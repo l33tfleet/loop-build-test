@@ -33,7 +33,7 @@
       <div class="duel-portraits">
         {% for p in duel.sides %}
         <figure class="duel-side">
-          <span class="duel-frame" aria-hidden="true"><span class="duel-portrait"></span></span>
+          <span class="duel-frame" aria-hidden="true"><span class="duel-portrait" data-planet="{{ p.name|lower }}" style="width: {{ p.width_pct }}%"></span></span>
           <figcaption><strong>{{ p.name }}</strong> <span>{{ "{:,}".format(p.diameter_km) }} km</span></figcaption>
         </figure>
         {% endfor %}
