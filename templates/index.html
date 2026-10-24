@@ -21,8 +21,10 @@
           <legend>{{ text }}</legend>
           {% for p in planets|sort(attribute="order") %}
           {% set slug = p.name|lower %}
-          <input type="radio" id="duel-{{ side }}-{{ slug }}" name="{{ side }}" value="{{ slug }}"{% if duel[side] == slug %} checked{% endif %}>
-          <label for="duel-{{ side }}-{{ slug }}">{{ p.name }}</label>
+          <span class="duel-radio-pair">
+            <input type="radio" id="duel-{{ side }}-{{ slug }}" name="{{ side }}" value="{{ slug }}"{% if duel[side] == slug %} checked{% endif %}>
+            <label for="duel-{{ side }}-{{ slug }}">{{ p.name }}</label>
+          </span>
           {% endfor %}
         </fieldset>
         {% endfor %}
