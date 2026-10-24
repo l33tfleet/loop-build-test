@@ -9,16 +9,110 @@
 <body>
   <header>
     <h1 data-marker="solar-arcade">Solar Arcade</h1>
-    <p class="tagline">A pocket-sized planet playground.</p>
+    <p class="tagline">Compare the sizes of all eight planets on one scale, switch to a bar graph, then see the four rocky planets zoomed in.</p>
   </header>
   <main>
+    <section class="planet-duel" aria-labelledby="duel-title">
+      <h2 id="duel-title">Planet size duel</h2>
+      <form class="duel-form" action="/" method="get">
+        {% for side, text in (("left", "First planet"), ("right", "Second planet")) %}
+        <fieldset class="duel-field"{% if duel.error %} aria-describedby="duel-error"{% endif %}>
+          <legend>{{ text }}</legend>
+          {% for p in planets|sort(attribute="order") %}
+          {% set slug = p.name|lower %}
+          <input type="radio" id="duel-{{ side }}-{{ slug }}" name="{{ side }}" value="{{ slug }}"{% if duel[side] == slug %} checked{% endif %}>
+          <label for="duel-{{ side }}-{{ slug }}">{{ p.name }}</label>
+          {% endfor %}
+        </fieldset>
+        {% endfor %}
+        <button type="submit">Compare</button>
+      </form>
+      {% if duel.error %}
+      <p id="duel-error" role="alert">{{ duel.error }}</p>
+      {% else %}
+      <div class="duel-portraits">
+        {% for p in duel.sides %}
+        <figure class="duel-side">
+          <span class="duel-frame" aria-hidden="true"><span class="duel-portrait"></span></span>
+          <figcaption><strong>{{ p.name }}</strong> <span>{{ "{:,}".format(p.diameter_km) }} km</span></figcaption>
+        </figure>
+        {% endfor %}
+      </div>
+      <p class="duel-ratio" aria-live="polite">{{ duel.sides[0].name }}'s diameter is <strong>{{ duel.ratio }}</strong> times {{ duel.sides[1].name }}'s.</p>
+      {% endif %}
+    </section>
+    <section class="planet-quiz" aria-labelledby="quiz-title">
+      <h2 id="quiz-title">Planet diameter quiz</h2>
+      {% if quiz.error %}
+      <p role="alert">{{ quiz.error }}</p>
+      <a class="quiz-next" href="/?round=1">Start at round 1</a>
+      {% else %}
+      <p class="quiz-round">Round {{ quiz.number }} of 3</p>
+      <form action="/" method="get">
+        <input type="hidden" name="round" value="{{ quiz.number }}">
+        <fieldset>
+          <legend>Which planet has the larger diameter?</legend>
+          {% for p in quiz.sides %}
+          <button type="submit" name="choice" value="{{ p.name|lower }}">{{ p.name }}</button>
+          {% endfor %}
+        </fieldset>
+      </form>
+      <div class="quiz-scale">
+        {% for p in quiz.sides %}
+        <span class="quiz-side"><span class="quiz-frame" aria-hidden="true"><span class="quiz-planet" data-planet="{{ p.name|lower }}" style="width: {{ p.width_pct }}%"></span></span><span class="quiz-name">{{ p.name }}</span></span>
+        {% endfor %}
+      </div>
+      <p class="quiz-scale-note">Drawn to scale: each circle's width is the planet's diameter divided by the larger one's.</p>
+      {% if quiz.choice %}
+      <div class="quiz-answer" role="status">
+        <p><strong>{{ "Correct" if quiz.correct else "Try the next pair" }}</strong> — You chose {{ quiz.choice.name }}.</p>
+        <ul>
+          {% for p in quiz.sides %}
+          <li>{{ p.name }}: {{ "{:,}".format(p.diameter_km) }} km</li>
+          {% endfor %}
+        </ul>
+        <p>{{ quiz.winner.name }} has the larger diameter.</p>
+      </div>
+      <a class="quiz-next" href="/?round={{ quiz.next }}">Next</a>
+      {% endif %}
+      {% endif %}
+    </section>
+    <section class="birthday-booth" aria-labelledby="birthday-title">
+      <h2 id="birthday-title">Planet birthdays</h2>
+      <p id="birthday-note">How many trips around the Sun? A toy year conversion, not a calendar-date calculation.</p>
+      <form action="/" method="get">
+        <input type="hidden" name="sort" value="{{ sort }}">
+        <label for="earth-age">Earth age (years)</label>
+        <div class="birthday-controls">
+          <input id="earth-age" name="age" type="number" min="0" max="120" step="any" required
+                 value="{{ age }}" aria-describedby="birthday-note{% if age_error %} age-error{% endif %}"{% if age_error %} aria-invalid="true"{% endif %}>
+          <button type="submit">Find my planet ages</button>
+        </div>
+        <a class="birthday-try" href="/?age=10">or try age 10</a>
+      </form>
+      {% if age_error %}<p id="age-error" role="alert">{{ age_error }}</p>{% endif %}
+      {% if birthdays %}
+      <ul class="birthday-results" aria-label="Age in each planet's years">
+        {% for birthday in birthdays %}
+        <li class="birthday-result">
+          <span>{{ birthday.name }}</span>
+          <strong>{{ birthday.years }}</strong> <span>years</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </section>
     <section class="diameter-scale" aria-labelledby="scale-title">
       <h2 id="scale-title">Diameter scale</h2>
-      <p class="scale-note">Each circle's diameter is the planet's diameter divided by {{ largest.name }}'s {{ "{:,}".format(largest.diameter_km) }} km, on one linear scale. The circles overlap on a shared baseline so sizes compare directly.</p>
-      <input class="scale-view" type="radio" name="scale-view" id="scale-view-circles" value="circles" checked>
-      <label class="scale-view-label" for="scale-view-circles">Overlapping circles</label>
-      <input class="scale-view" type="radio" name="scale-view" id="scale-view-bars" value="bars">
-      <label class="scale-view-label" for="scale-view-bars">Bar graph</label>
+      <p class="scale-note" data-view="circles">Each circle's diameter is the planet's diameter divided by {{ largest.name }}'s {{ "{:,}".format(largest.diameter_km) }} km, on one linear scale. The circles overlap on a shared baseline so sizes compare directly.</p>
+      <p class="scale-note" data-view="bars">Each bar's length is the planet's diameter divided by {{ largest.name }}'s {{ "{:,}".format(largest.diameter_km) }} km, on one linear scale. The bars share a left edge so sizes compare directly.</p>
+      <fieldset class="scale-views">
+        <legend>View as</legend>
+        <input class="scale-view" type="radio" name="scale-view" id="scale-view-circles" value="circles" checked>
+        <label class="scale-view-label" for="scale-view-circles">Overlapping circles</label>
+        <input class="scale-view" type="radio" name="scale-view" id="scale-view-bars" value="bars">
+        <label class="scale-view-label" for="scale-view-bars">Bar graph</label>
+      </fieldset>
       <ol class="scale-rows">
         {% for p in scale %}
         <li class="scale-row" data-order="{{ p.order }}" style="--z: {{ p.z }}">
@@ -34,15 +128,45 @@
         {% endfor %}
       </ol>
     </section>
-    <section class="shelf" aria-label="Planet shelf">
+    <section class="rocky-inset" aria-labelledby="inset-title">
+      <h3 id="inset-title">Rocky planets, zoomed in</h3>
+      <p class="inset-note">Different scale from the chart above: here each circle's diameter is the planet's diameter divided by Earth's {{ "{:,}".format(earth.diameter_km) }} km, so Earth fills the panel width.</p>
+      <ol class="inset-rows">
+        {% for p in rocky %}
+        <li class="inset-row" data-order="{{ p.order }}" style="--z: {{ p.z }}">
+          <span class="inset-track" aria-hidden="true"><span class="inset-circle" style="width: {{ p.width_pct }}%"></span></span>
+          <span class="inset-label inset-label--{{ p.label }}" style="--y: {{ p.label_y }}%">
+            <span class="inset-name">{{ p.name }}</span>
+            <span class="inset-value">{{ "{:,}".format(p.diameter_km) }} km</span>
+          </span>
+        </li>
+        {% endfor %}
+      </ol>
+    </section>
+    <form class="shelf-sort" action="/" method="get">
+      <label for="planet-sort">Planet shelf order</label>
+      <select id="planet-sort" name="sort">
+        <option value="sun"{% if sort == "sun" %} selected{% endif %}>Sun order</option>
+        <option value="diameter"{% if sort == "diameter" %} selected{% endif %}>Largest diameter first</option>
+        <option value="year"{% if sort == "year" %} selected{% endif %}>Shortest year first</option>
+      </select>
+      {% if age != "" %}<input type="hidden" name="age" value="{{ age }}">{% endif %}
+      <button type="submit">Apply order</button>
+    </form>
+    <section class="planet-shelf" aria-labelledby="shelf-title">
+      <h2 id="shelf-title">The eight planets</h2>
+      <p class="shelf-note">{{ {"sun": "In order from the Sun", "diameter": "Largest diameter first", "year": "Shortest year first"}[sort] }}</p>
+      <div class="shelf">
       {% for p in planets %}
       <article class="planet-card" data-order="{{ p.order }}">
-        <span class="order">#{{ p.order }}</span>
         <h2>{{ p.name }}</h2>
+        <p class="order">{{ p.ordinal }} from the Sun</p>
         <p class="label">Diameter</p>
         <p class="diameter">{{ "{:,}".format(p.diameter_km) }} km</p>
+        <p class="earths">About {{ p.earths }} Earth{{ "" if p.earths == "1" else "s" }} wide</p>
       </article>
       {% endfor %}
+      </div>
     </section>
     <p class="source">Data: <a href="{{ source.url }}" rel="noopener">{{ source.name }}</a>, snapshot {{ source.retrieved }}.</p>
   </main>

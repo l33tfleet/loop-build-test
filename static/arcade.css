@@ -8,26 +8,73 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 .empty { padding: 32px 16px; border: 1px dashed var(--muted); border-radius: 12px; text-align: center; color: var(--muted); }
 .shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 16px; }
 .planet-card { position: relative; padding: 16px; border: 1px solid #24345e; border-radius: 12px; background: #13204a; min-width: 0; }
-.planet-card h2 { margin: 0 0 8px; color: var(--paper); font-size: 1.35rem; }
-.planet-card .order { position: absolute; top: 12px; right: 14px; color: var(--muted); font-size: 0.85rem; }
+.planet-card h2 { margin: 0 0 2px; color: var(--paper); font-size: 1.35rem; }
+.planet-card .order { margin: 0 0 8px; color: var(--muted); font-size: 0.85rem; }
 .planet-card .label { margin: 0; color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; }
 .planet-card .diameter { margin: 0; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.planet-card .earths { margin: 4px 0 0; color: var(--muted); font-size: 0.9rem; }
 .source { max-width: 960px; margin: 24px auto 0; color: var(--muted); font-size: 0.9rem; overflow-wrap: anywhere; }
 .source a { color: var(--paper); }
+.shelf-sort { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 0 0 16px; }
+.shelf-sort label { font-weight: 600; }
+.shelf-sort select, .shelf-sort button { max-width: 100%; padding: 10px 12px; border: 1px solid var(--muted);
+                                      border-radius: 6px; font: inherit; }
+.shelf-sort select { background: var(--navy); color: var(--paper); }
+.shelf-sort button { background: var(--paper); color: var(--navy); cursor: pointer; }
+.shelf-sort :focus-visible { outline: 3px solid #b3ceff; outline-offset: 3px; }
 
+.birthday-booth { margin-bottom: 24px; padding: 20px; border: 1px solid #536694; border-radius: 12px; background: #13204a; }
+.birthday-booth h2 { margin: 0; color: var(--paper); }
+.birthday-booth p { margin: 8px 0 16px; }
+.birthday-booth label { display: block; margin-bottom: 6px; font-weight: 600; }
+.birthday-controls { display: flex; flex-wrap: wrap; gap: 12px; }
+.birthday-controls input, .birthday-controls button { padding: 10px 12px; border: 1px solid #8e98b3; border-radius: 6px; font: inherit; }
+.birthday-controls input { width: 10rem; max-width: 100%; background: var(--navy); color: var(--paper); }
+.birthday-controls button { background: var(--paper); color: var(--navy); cursor: pointer; }
+.birthday-controls :focus-visible { outline: 3px solid #b3ceff; outline-offset: 3px; }
+/* One-tap example under the button: reuses the GET path with age=10. */
+.birthday-try { display: inline-block; margin-top: 10px; padding: 4px 0; color: var(--paper); overflow-wrap: anywhere; }
+.birthday-try:focus-visible { outline: 3px solid #b3ceff; outline-offset: 3px; border-radius: 2px; }
+.birthday-results { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: 12px; padding: 0; margin: 20px 0 0; list-style: none; }
+.birthday-result { padding: 12px; background: var(--navy); border-radius: 8px; }
+.birthday-result > span:first-child { display: block; color: var(--paper); }
+.birthday-result strong { font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+#age-error { color: #ffd3c6; }
+
+/* Shelf title sits above the grid, so it never takes a card cell; > keeps it off the card h2s. */
+.planet-shelf > h2 { margin: 0 0 4px; color: var(--paper); font-size: 1.35rem; }
+.shelf-note { margin: 0 0 16px; color: var(--muted); font-size: 0.9rem; }
 /* Cards keep a readable width on large screens. */
 .shelf { max-width: 960px; }
+/* Phones: two cards per row from ~376px up (390px gives 173px columns); 320px stays one column so text never wraps. */
+@media (max-width: 420px) {
+  .shelf { grid-template-columns: repeat(auto-fill, minmax(min(100%, 165px), 1fr)); gap: 12px; }
+  .planet-card { padding: 12px; }
+  .planet-card h2 { font-size: 1.2rem; }
+  .planet-card .diameter { font-size: 1.05rem; }
+  .planet-card .earths { font-size: 0.8rem; }
+}
 
 /* Diameter scale: one linear axis, circle diameter = diameter / largest diameter of a shared square track. */
 .diameter-scale { margin: 0 0 32px; padding: 16px; border: 1px solid #24345e; border-radius: 12px; background: #101b40; }
 .diameter-scale h2 { margin: 0 0 4px; color: var(--paper); font-size: 1.35rem; }
 .scale-note { margin: 0 0 16px; color: var(--muted); font-size: 0.9rem; }
-/* View toggle: visually hidden radios drive the list below through the sibling combinator. */
+/* One note per view, switched by the same :has() as the chart; display: none keeps the other out of screen readers. */
+.scale-note[data-view="bars"] { display: none; }
+.diameter-scale:has(#scale-view-bars:checked) .scale-note[data-view="circles"] { display: none; }
+.diameter-scale:has(#scale-view-bars:checked) .scale-note[data-view="bars"] { display: block; }
+/* View toggle: a borderless fieldset groups the visually hidden radios; the legend floats inline before the pills. */
+.scale-views { margin: 0 0 16px; padding: 0; border: 0; min-inline-size: 0; white-space: nowrap; }
+.scale-views legend { float: left; margin: 0 6px 0 0; padding: 6px 0; color: var(--muted); font-size: 0.8rem; line-height: 1.5; }
 .scale-view { position: absolute; opacity: 0; pointer-events: none; }
-.scale-view-label { display: inline-block; margin: 0 4px 16px 0; padding: 4px 12px; border: 1px solid #24345e;
+.scale-view-label { display: inline-block; margin: 0 4px 0 0; padding: 4px 12px; border: 1px solid #24345e;
                     border-radius: 999px; color: var(--muted); font-size: 0.9rem; cursor: pointer; }
 .scale-view:checked + .scale-view-label { border-color: var(--paper); color: var(--paper); background: #1b2b5c; }
 .scale-view:focus-visible + .scale-view-label { outline: 2px solid var(--paper); outline-offset: 2px; }
+/* Narrow phones (390px leaves ~324px inside the card): tighten the pills so legend and both pills share one row. */
+@media (max-width: 420px) {
+  .scale-view-label { padding: 4px 9px; font-size: 0.85rem; }
+}
 
 /* Overlapping circles: one square frame, every circle centred on the same bottom baseline, largest behind. */
 .scale-rows { position: relative; display: block; aspect-ratio: 1; width: min(100%, 440px); margin: 0 auto;
@@ -46,13 +93,85 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 .scale-name { color: var(--paper); font-weight: 600; }
 .scale-value { font-variant-numeric: tabular-nums; }
 
-/* Bar graph view: the same rows laid out as horizontal bars on one linear axis. */
+/* Bar graph view: the same rows laid out as horizontal bars on one linear axis.
+   The radios now live inside the fieldset, so :has() on the section does the switching; the trailing
+   sibling selectors no longer match and are kept only because tests/regressions/test_overlap_scale.py pins them. */
+.diameter-scale:has(#scale-view-bars:checked) .scale-rows,
 #scale-view-bars:checked ~ .scale-rows { display: grid; gap: 8px; aspect-ratio: auto; width: auto; }
+.diameter-scale:has(#scale-view-bars:checked) .scale-rows .scale-row,
 #scale-view-bars:checked ~ .scale-rows .scale-row { display: grid; grid-template-columns: minmax(0, 1fr) 7.5rem;
                                                      align-items: center; gap: 12px; }
+.diameter-scale:has(#scale-view-bars:checked) .scale-rows .scale-track,
 #scale-view-bars:checked ~ .scale-rows .scale-track { position: static; display: block; aspect-ratio: auto; }
+.diameter-scale:has(#scale-view-bars:checked) .scale-rows .scale-bar,
 #scale-view-bars:checked ~ .scale-rows .scale-bar { aspect-ratio: auto; block-size: 14px; border-radius: 4px;
                                                     background: var(--paper); }
+.diameter-scale:has(#scale-view-bars:checked) .scale-rows .scale-leader,
 #scale-view-bars:checked ~ .scale-rows .scale-leader { display: none; }
+.diameter-scale:has(#scale-view-bars:checked) .scale-rows .scale-label,
 #scale-view-bars:checked ~ .scale-rows .scale-label { position: static; flex-direction: row; gap: 8px;
                                                       transform: none; font-size: 0.9rem; }
+
+/* Rocky planet inset: the same shared-baseline circles, scaled to Earth so the small planets compare.
+   Earth's label sits above its rim, so the frame leaves room for two label lines above it. */
+.rocky-inset { margin: -16px 0 32px; padding: 16px; border: 1px solid #24345e; border-radius: 12px; background: #101b40; }
+main:has(#scale-view-bars:checked) .rocky-inset { display: none; }
+.rocky-inset h3 { margin: 0 0 4px; color: var(--paper); font-size: 1.1rem; }
+.inset-note { margin: 0; color: var(--muted); font-size: 0.9rem; }
+.inset-rows { position: relative; display: block; aspect-ratio: 1; width: min(100%, 320px); margin: 2.5rem auto 0;
+              padding: 0; list-style: none; }
+.inset-track { position: absolute; inset: 0; z-index: var(--z); display: flex; align-items: flex-end;
+               justify-content: center; pointer-events: none; }
+.inset-circle { display: block; aspect-ratio: 1; background: rgb(244 233 210 / 0.1); border: 1.5px solid var(--paper);
+                border-radius: 50%; }
+.inset-label { position: absolute; z-index: 30; left: 50%; transform: translateX(-50%); display: flex;
+               flex-direction: column; align-items: center; line-height: 1.2; font-size: 0.8rem;
+               text-shadow: 0 0 3px var(--navy), 0 0 3px var(--navy); white-space: nowrap; }
+.inset-label--inside { top: calc(100% - var(--y) + 4%); }
+.inset-label--above { bottom: calc(var(--y) + 1%); }
+.inset-name { color: var(--paper); font-weight: 600; }
+.inset-value { font-variant-numeric: tabular-nums; }
+
+.planet-duel { margin-bottom: 24px; padding: 20px; border: 1px solid #536694; border-radius: 12px; background: #13204a; }
+.planet-duel h2 { margin: 0 0 12px; color: var(--paper); }
+.duel-form { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }
+.duel-field { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 4px; margin: 0; padding: 8px 12px 12px;
+              border: 1px solid #536694; border-radius: 8px; }
+.duel-field legend { padding: 0 4px; font-weight: 600; }
+.duel-field label { padding: 4px 10px 4px 2px; }
+.duel-field input:checked + label { color: var(--paper); font-weight: 600; }
+.duel-form button { max-width: 100%; padding: 10px 12px; border: 1px solid var(--muted); border-radius: 6px; font: inherit;
+                    background: var(--paper); color: var(--navy); cursor: pointer; }
+.duel-form :focus-visible { outline: 3px solid #b3ceff; outline-offset: 3px; }
+.duel-portraits { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0 0; }
+.duel-side { margin: 0; text-align: center; }
+.duel-frame { display: flex; align-items: center; justify-content: center; }
+.duel-portrait { display: block; width: min(100%, 240px); aspect-ratio: 1; border-radius: 50%;
+                 background: radial-gradient(circle at 35% 30%, var(--paper), #c98b4f 60%, #6b3f22); }
+.duel-side figcaption { margin-top: 8px; }
+.duel-side strong { display: block; color: var(--paper); font-size: 1.25rem; }
+.duel-ratio { margin: 16px 0 0; color: var(--paper); font-size: 1.5rem; text-align: center; }
+.duel-ratio strong { font-size: 2.25rem; font-variant-numeric: tabular-nums; }
+#duel-error { color: #ffd3c6; }
+
+.planet-quiz { margin-bottom: 24px; padding: 20px; border: 1px solid #536694; border-radius: 12px; background: #13204a; }
+.planet-quiz h2 { margin: 0; color: var(--paper); }
+.quiz-round { margin: 8px 0; color: var(--muted); }
+.planet-quiz fieldset { min-inline-size: 0; margin: 0; padding: 0; border: 0; }
+.planet-quiz legend { padding: 0; margin-bottom: 12px; font-weight: 600; }
+.planet-quiz button, .quiz-next { display: inline-block; max-width: 100%; margin: 0 8px 8px 0; padding: 10px 16px;
+                               border: 1px solid var(--muted); border-radius: 6px; background: var(--paper);
+                               color: var(--navy); font: inherit; cursor: pointer; }
+.planet-quiz :focus-visible { outline: 3px solid #b3ceff; outline-offset: 3px; }
+.quiz-answer { margin: 12px 0; padding: 12px 16px; background: var(--navy); border-radius: 8px; }
+.quiz-answer p { margin: 4px 0; }
+.quiz-answer ul { padding-left: 20px; font-variant-numeric: tabular-nums; }
+.planet-quiz [role="alert"] { color: #ffd3c6; }
+/* Quiz drawing: equal columns share one bottom baseline; circle width = diameter / larger diameter, no floor. */
+.quiz-scale { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 480px; margin: 4px 0 8px; }
+.quiz-side { display: flex; flex-direction: column; min-inline-size: 0; text-align: center; }
+.quiz-frame { display: flex; flex: 1; align-items: flex-end; justify-content: center; }
+.quiz-planet { display: block; flex: none; aspect-ratio: 1; border-radius: 50%;
+               background: radial-gradient(circle at 35% 30%, var(--paper), #c98b4f 60%, #6b3f22); }
+.quiz-name { margin-top: 8px; color: var(--paper); font-weight: 600; }
+.quiz-scale-note { margin: 0 0 12px; color: var(--muted); font-size: 0.9rem; }
