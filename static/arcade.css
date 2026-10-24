@@ -143,10 +143,11 @@ main:has(#scale-view-bars:checked) .rocky-inset { display: none; }
 .duel-form button { max-width: 100%; padding: 10px 12px; border: 1px solid var(--muted); border-radius: 6px; font: inherit;
                     background: var(--paper); color: var(--navy); cursor: pointer; }
 .duel-form :focus-visible { outline: 3px solid #b3ceff; outline-offset: 3px; }
-.duel-portraits { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0 0; }
-.duel-side { margin: 0; text-align: center; }
-.duel-frame { display: flex; align-items: center; justify-content: center; }
-.duel-portrait { display: block; width: min(100%, 240px); aspect-ratio: 1; border-radius: 50%;
+/* Duel drawing: equal columns share one bottom baseline; portrait width = diameter / larger diameter, no floor. */
+.duel-portraits { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 520px; margin: 20px auto 0; }
+.duel-side { display: flex; flex-direction: column; min-inline-size: 0; margin: 0; text-align: center; }
+.duel-frame { display: flex; flex: 1; align-items: flex-end; justify-content: center; }
+.duel-portrait { display: block; flex: none; aspect-ratio: 1; border-radius: 50%;
                  background: radial-gradient(circle at 35% 30%, var(--paper), #c98b4f 60%, #6b3f22); }
 .duel-side figcaption { margin-top: 8px; }
 .duel-side strong { display: block; color: var(--paper); font-size: 1.25rem; }
