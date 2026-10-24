@@ -14,12 +14,16 @@
           {% endfor %}
         </fieldset>
       </form>
-      <div class="quiz-scale">
+      <div class="quiz-scale" data-scale="{{ "true" if quiz.choice else "neutral" }}">
         {% for p in quiz.sides %}
-        <span class="quiz-side"><span class="quiz-frame" aria-hidden="true"><span class="quiz-planet" data-planet="{{ p.name|lower }}" style="width: {{ p.width_pct }}%"></span></span><span class="quiz-name">{{ p.name }}</span></span>
+        <span class="quiz-side"><span class="quiz-frame" aria-hidden="true"><span class="quiz-planet" data-planet="{{ p.name|lower }}" style="width: {{ p.width_pct if quiz.choice else 100 }}%"></span></span><span class="quiz-name">{{ p.name }}</span></span>
         {% endfor %}
       </div>
+      {% if quiz.choice %}
       <p class="quiz-scale-note">Drawn to scale: each circle's width is the planet's diameter divided by the larger one's.</p>
+      {% else %}
+      <p class="quiz-scale-note">Same size until you answer, so the circles don't give it away. Guess to see them drawn to scale.</p>
+      {% endif %}
       {% if quiz.choice %}
       <div class="quiz-answer" role="status">
         <p><strong>{{ "Correct" if quiz.correct else "Try the next pair" }}</strong> — You chose {{ quiz.choice.name }}.</p>
