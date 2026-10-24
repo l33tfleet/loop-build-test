@@ -73,8 +73,10 @@ def _quiz(planets, round_number, choice):
     if choice is not None and choice not in pair:
         return {"error": "Choose one of the two planets in this round."}
     by_slug = {p["name"].lower(): p for p in planets}
-    sides = [by_slug[slug] for slug in pair]
-    winner = max(sides, key=lambda p: p["diameter_km"])
+    winner = max((by_slug[slug] for slug in pair), key=lambda p: p["diameter_km"])
+    # Linear, no floor: each circle's diameter is diameter / the larger one's, so Jupiter is ~11 Earths wide.
+    sides = [{**by_slug[slug], "width_pct": round(100 * by_slug[slug]["diameter_km"] / winner["diameter_km"], 4)}
+             for slug in pair]
     return {"number": number, "sides": sides, "choice": by_slug[choice] if choice else None,
             "winner": winner, "correct": choice == winner["name"].lower(), "next": number % 3 + 1}
 
