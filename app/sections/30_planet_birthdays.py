@@ -21,5 +21,7 @@ def context(state):
                 name = planet["name"]
                 # Earth's ratio is exactly one; avoid float round-trip rounding drift.
                 years = earth_age if name == "Earth" else earth_age * periods["Earth"] / periods[name]
-                birthdays.append({"name": name, "years": f"{years:.1f}"})
+                # Two decimals below one so tiny ages (Uranus 0.14, Neptune 0.07) stay apart.
+                digits = 2 if 0 < years < 1 else 1
+                birthdays.append({"name": name, "years": f"{years:.{digits}f}"})
     return {"age_error": age_error, "birthdays": birthdays}

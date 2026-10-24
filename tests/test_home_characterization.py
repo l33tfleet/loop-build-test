@@ -199,7 +199,7 @@ def test_home_birthdays(home):
     if params.get("age") == "10":
         assert [node.text for node in results] == [
             "Mercury 41.5 years", "Venus 16.3 years", "Earth 10.0 years", "Mars 5.3 years",
-            "Jupiter 0.8 years", "Saturn 0.3 years", "Uranus 0.1 years", "Neptune 0.1 years",
+            "Jupiter 0.84 years", "Saturn 0.34 years", "Uranus 0.12 years", "Neptune 0.06 years",
         ]
     else:
         assert not results

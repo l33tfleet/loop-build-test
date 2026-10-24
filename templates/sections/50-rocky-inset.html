@@ -4,7 +4,7 @@
       <ol class="inset-rows">
         {% for p in rocky %}
         <li class="inset-row" data-order="{{ p.order }}" style="--z: {{ p.z }}">
-          <span class="inset-track" aria-hidden="true"><span class="inset-circle" style="width: {{ p.width_pct }}%"></span></span>
+          <span class="inset-track" aria-hidden="true"><span class="inset-circle" data-planet="{{ p.name|lower }}" style="width: {{ p.width_pct }}%"></span></span>
           <span class="inset-label inset-label--{{ p.label }}" style="--y: {{ p.label_y }}%">
             <span class="inset-name">{{ p.name }}</span>
             <span class="inset-value">{{ "{:,}".format(p.diameter_km) }} km</span>

@@ -12,7 +12,7 @@
       <ol class="scale-rows">
         {% for p in scale %}
         <li class="scale-row" data-order="{{ p.order }}" style="--z: {{ p.z }}">
-          <span class="scale-track" aria-hidden="true"><span class="scale-bar" style="width: {{ p.width_pct }}%"></span></span>
+          <span class="scale-track" aria-hidden="true"><span class="scale-bar" data-planet="{{ p.name|lower }}" style="width: {{ p.width_pct }}%"></span></span>
           {% if p.label == "leader" %}
           <svg class="scale-leader" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="50" y1="{{ (100 - p.width_pct) | round(4) }}" x2="71" y2="{{ 100 - p.label_y }}" vector-effect="non-scaling-stroke"/></svg>
           {% endif %}
