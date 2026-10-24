@@ -167,3 +167,11 @@ main:has(#scale-view-bars:checked) .rocky-inset { display: none; }
 .quiz-answer p { margin: 4px 0; }
 .quiz-answer ul { padding-left: 20px; font-variant-numeric: tabular-nums; }
 .planet-quiz [role="alert"] { color: #ffd3c6; }
+/* Answer drawing: both frames share one width and a bottom baseline, so circle widths compare as diameters. */
+.quiz-scale-note { color: var(--muted); font-size: 0.9rem; }
+.quiz-scale { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 480px; margin: 12px 0 4px; }
+.quiz-side { display: flex; flex-direction: column; margin: 0; min-width: 0; text-align: center; }
+.quiz-frame { display: flex; flex: 1; align-items: flex-end; justify-content: center; }
+.quiz-planet { display: block; aspect-ratio: 1; border-radius: 50%;
+               background: radial-gradient(circle at 35% 30%, var(--paper), #c98b4f 60%, #6b3f22); }
+.quiz-side figcaption { margin-top: 8px; color: var(--paper); font-weight: 600; }
