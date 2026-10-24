@@ -26,7 +26,6 @@
 
   async function update(url, origin, push) {
     var name = origin.getAttribute("data-region");
-    var before = origin.getBoundingClientRect().top;
     var focused = origin.contains(document.activeElement) ? document.activeElement : null;
     var doc;
     try {
@@ -40,12 +39,14 @@
       window.location.assign(url);
       return;
     }
+    // Measure right before swapping, so scrolling done while the response loaded is kept.
+    var before = sameRegion(name).getBoundingClientRect().top;
     doc.querySelectorAll("[data-region]").forEach(function (fresh) {
       var old = sameRegion(fresh.getAttribute("data-region"));
       if (old && old.outerHTML !== fresh.outerHTML) old.replaceWith(document.adoptNode(fresh));
     });
     if (push) history.pushState(null, "", url);
-    // Keep the tapped section exactly where it was on screen, even if sections above it changed height.
+    // Undo only the shift the swap caused, so the tapped section stays put even if sections above changed height.
     var current = sameRegion(name);
     window.scrollBy(0, current.getBoundingClientRect().top - before);
     if (focused && !document.contains(focused)) {
