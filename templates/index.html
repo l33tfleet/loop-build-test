@@ -37,10 +37,11 @@
     <section class="shelf" aria-label="Planet shelf">
       {% for p in planets %}
       <article class="planet-card" data-order="{{ p.order }}">
-        <span class="order">#{{ p.order }}</span>
         <h2>{{ p.name }}</h2>
+        <p class="order">{{ p.ordinal }} from the Sun</p>
         <p class="label">Diameter</p>
         <p class="diameter">{{ "{:,}".format(p.diameter_km) }} km</p>
+        <p class="earths">About {{ p.earths }} Earth{{ "" if p.earths == "1" else "s" }} wide</p>
       </article>
       {% endfor %}
     </section>
