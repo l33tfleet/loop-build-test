@@ -142,8 +142,8 @@ def test_home_duel(home):
             else ["Jupiter 142,984 km", "Earth 12,756 km"]
         )
         assert duel.one("p", **{"class": "duel-ratio"}).text == (
-            "Mercury's diameter is 0.7 times Mars's." if picked
-            else "Jupiter's diameter is 11.2 times Earth's."
+            "Mars is 1.4 times as wide as Mercury." if picked
+            else "Jupiter is 11.2 times as wide as Earth."
         )
         assert not duel.find_all(role="alert")
 
