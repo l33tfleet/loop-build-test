@@ -33,16 +33,17 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 /* Cards keep a readable width on large screens. */
 .shelf { max-width: 960px; }
 
-/* Diameter scale: one linear axis, bar length = diameter / largest diameter. */
+/* Diameter scale: one linear axis, circle diameter = diameter / largest diameter of a shared square track. */
 .diameter-scale { margin: 0 0 32px; padding: 16px; border: 1px solid #24345e; border-radius: 12px; background: #101b40; }
 .diameter-scale h2 { margin: 0 0 4px; color: var(--paper); font-size: 1.35rem; }
 .scale-note { margin: 0 0 16px; color: var(--muted); font-size: 0.9rem; }
-.scale-rows { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
-.scale-row { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr) 7.5rem; align-items: center; gap: 12px; }
+.scale-rows { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.scale-row { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; text-align: center; }
+.scale-track { display: flex; align-items: center; justify-content: center; align-self: stretch; aspect-ratio: 1; }
+.scale-bar { display: block; aspect-ratio: 1; background: var(--paper); border-radius: 50%; }
 .scale-name { color: var(--paper); font-weight: 600; }
-.scale-track { height: 14px; border-bottom: 1px solid #3a4b7a; }
-.scale-bar { display: block; height: 100%; background: var(--paper); border-radius: 0 3px 3px 0; }
-.scale-value { text-align: right; font-variant-numeric: tabular-nums; }
+.scale-value { font-variant-numeric: tabular-nums; }
 @media (max-width: 480px) {
-  .scale-row { grid-template-columns: 4.5rem minmax(0, 1fr) 6.5rem; gap: 8px; font-size: 0.9rem; }
+  .scale-rows { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .scale-row { font-size: 0.9rem; }
 }
