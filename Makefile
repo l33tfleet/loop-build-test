@@ -8,6 +8,7 @@ check:
 
 smoke:
 	curl -fsS $(BASE_URL)/healthz
+	curl -fsS $(BASE_URL)/ | grep -q 'data-marker="solar-arcade"'
 	curl -fsS "$(BASE_URL)/convert?value=1&src=km&dst=mi"
 
 serve:

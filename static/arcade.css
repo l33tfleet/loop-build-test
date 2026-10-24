@@ -1,0 +1,8 @@
+:root { --navy: #0b1530; --paper: #f4e9d2; --ink: #d9deea; --muted: #8e98b3; }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 24px 16px; background: var(--navy); color: var(--ink);
+       font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+header, main { max-width: 960px; margin: 0 auto; }
+h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em; }
+.tagline { margin: 4px 0 24px; color: var(--muted); }
+.empty { padding: 32px 16px; border: 1px dashed var(--muted); border-radius: 12px; text-align: center; color: var(--muted); }

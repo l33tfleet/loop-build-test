@@ -1,9 +1,22 @@
-"""Unit converter: a toy app for exercising the build loop end to end."""
-from fastapi import FastAPI, HTTPException
+"""Solar Arcade: a toy planet playground for exercising an autonomous build loop end to end."""
+from pathlib import Path
 
-app = FastAPI(title="loop-build-test")
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
+ROOT = Path(__file__).resolve().parent.parent
+app = FastAPI(title="Solar Arcade")
+app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
+templates = Jinja2Templates(directory=ROOT / "templates")
 
 FACTORS = {("km", "mi"): 0.621371, ("mi", "km"): 1.609344, ("kg", "lb"): 2.204623, ("lb", "kg"): 0.453592}
+
+
+@app.get("/", response_class=HTMLResponse)
+def home(request: Request):
+    return templates.TemplateResponse(request, "index.html", {})
 
 
 @app.get("/healthz")
