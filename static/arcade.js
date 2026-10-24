@@ -78,6 +78,13 @@
     update(url.href, origin, true);
   });
 
+  // Tapping a duel planet compares right away; the Compare button stays for pages without this script.
+  document.addEventListener("change", function (event) {
+    var radio = event.target;
+    var form = radio.type === "radio" && radio.closest(".duel-form");
+    if (form && form.requestSubmit) form.requestSubmit();
+  });
+
   document.addEventListener("click", function (event) {
     if (event.defaultPrevented || event.button !== 0) return;
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
