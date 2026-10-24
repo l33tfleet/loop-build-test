@@ -18,6 +18,14 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 
 /* Cards keep a readable width on large screens. */
 .shelf { max-width: 960px; }
+/* Phones: two cards per row from ~376px up (390px gives 173px columns); 320px stays one column so text never wraps. */
+@media (max-width: 420px) {
+  .shelf { grid-template-columns: repeat(auto-fill, minmax(min(100%, 165px), 1fr)); gap: 12px; }
+  .planet-card { padding: 12px; }
+  .planet-card h2 { font-size: 1.2rem; }
+  .planet-card .diameter { font-size: 1.05rem; }
+  .planet-card .earths { font-size: 0.8rem; }
+}
 
 /* Diameter scale: one linear axis, circle diameter = diameter / largest diameter of a shared square track. */
 .diameter-scale { margin: 0 0 32px; padding: 16px; border: 1px solid #24345e; border-radius: 12px; background: #101b40; }
