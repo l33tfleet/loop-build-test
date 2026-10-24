@@ -85,19 +85,30 @@ def test_circle_fills_use_the_planet_colour():
         assert "var(--planet" in _rule(css, selector), selector
 
 
-def test_labels_inside_scale_circles_stay_readable():
+def test_scale_and_inset_fills_show_the_full_planet_colour():
+    # #76 feedback: a navy veil over the fills turned Jupiter and Saturn grey and Venus taupe.
     css = CSS.read_text()
     for selector in (".scale-bar", ".inset-circle"):
         rule = _rule(css, selector)
-        overlay = re.search(r"rgb\((\d+) (\d+) (\d+) / (0?\.\d+)\)", rule)
-        assert overlay, f"{selector} needs a dark overlay so labels stay readable"
-        *over, alpha = overlay.groups()
-        alpha = float(alpha)
-        for slug in SLUGS:
-            surface = _planet_rule(css, slug)
-            for hex_ in re.findall(r"#[0-9a-fA-F]{6}", surface):
-                mixed = tuple(alpha * int(o) + (1 - alpha) * c for o, c in zip(over, _rgb(hex_)))
-                assert _contrast(mixed, _rgb(PAPER)) >= 4.5, (selector, slug, hex_)
+        assert re.search(r"background:\s*var\(--planet-surface\)\s*;", rule), selector
+        assert not re.search(r"rgb\([^)]*/", rule), f"{selector} must not dull the colour with a translucent layer"
+
+
+def test_labels_on_the_circles_keep_readable_contrast():
+    # The labels sit on the coloured fills, so each gets its own solid navy backing: paper on it is >= 4.5:1.
+    css = CSS.read_text()
+    for selector in (".scale-label", ".inset-label"):
+        rule = _rule(css, selector)
+        backing = re.search(r"background:\s*var\(--navy\)\s*;", rule)
+        assert backing, f"{selector} needs a solid navy backing"
+        assert _contrast(_rgb("#0b1530"), _rgb(PAPER)) >= 4.5
+        assert _contrast(_rgb("#0b1530"), _rgb("#d9deea")) >= 4.5  # --ink, the km value colour
+
+
+def test_bar_view_labels_drop_the_backing():
+    css = CSS.read_text()
+    bar_label = re.search(r"#scale-view-bars:checked ~ \.scale-rows \.scale-label\s*\{([^}]*)\}", css).group(1)
+    assert re.search(r"background:\s*none", bar_label)
 
 
 def test_no_external_assets():
