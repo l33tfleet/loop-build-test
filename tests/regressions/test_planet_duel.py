@@ -66,6 +66,16 @@ def test_ratio_is_left_over_right_to_one_decimal(client, left, right):
     assert f"{DIAMETERS[left]:,} km" in section and f"{DIAMETERS[right]:,} km" in section
 
 
+def test_default_portraits_are_both_large(client):
+    section = duel(client.get("/?left=jupiter&right=earth").text)
+    portraits = re.findall(r'<span class="duel-portrait"([^>]*)>', section)
+    assert len(portraits) == 2
+    assert all("width" not in attrs for attrs in portraits), "portrait size must not shrink with the diameter ratio"
+    css = client.get("/static/arcade.css").text
+    rule = re.search(r"\.duel-portrait \{([^}]*)\}", css).group(1)
+    assert re.search(r"width: min\(100%, 240px\)", rule)
+
+
 def test_ratio_direction_flips(client):
     forward = sentence(duel(client.get("/?left=jupiter&right=earth").text))
     reverse = sentence(duel(client.get("/?left=earth&right=jupiter").text))

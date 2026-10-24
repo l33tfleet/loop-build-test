@@ -139,8 +139,8 @@ main:has(#scale-view-bars:checked) .rocky-inset { display: none; }
 .duel-form :focus-visible { outline: 3px solid #b3ceff; outline-offset: 3px; }
 .duel-portraits { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0 0; }
 .duel-side { margin: 0; text-align: center; }
-.duel-frame { display: flex; align-items: flex-end; justify-content: center; aspect-ratio: 1; }
-.duel-portrait { display: block; min-width: 4px; aspect-ratio: 1; border-radius: 50%;
+.duel-frame { display: flex; align-items: center; justify-content: center; }
+.duel-portrait { display: block; width: min(100%, 240px); aspect-ratio: 1; border-radius: 50%;
                  background: radial-gradient(circle at 35% 30%, var(--paper), #c98b4f 60%, #6b3f22); }
 .duel-side figcaption { margin-top: 8px; }
 .duel-side strong { display: block; color: var(--paper); font-size: 1.25rem; }

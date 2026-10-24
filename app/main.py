@@ -54,15 +54,13 @@ def _place_labels(scale):
 
 
 def _duel(planets, left, right):
-    """Two planets side by side; portraits scale to the larger one, ratio is left / right to one decimal."""
+    """Two planets side by side at the same large portrait size; ratio is left / right to one decimal."""
     by_slug = {p["name"].lower(): p for p in planets}
     if left not in by_slug or right not in by_slug:
         return {"left": "jupiter", "right": "earth",
                 "error": "Choose two planets from the lists: unknown planet name."}
     a, b = by_slug[left], by_slug[right]
-    big = max(a["diameter_km"], b["diameter_km"])
-    sides = [{**p, "width_pct": round(100 * p["diameter_km"] / big, 4)} for p in (a, b)]
-    return {"left": left, "right": right, "sides": sides, "ratio": f"{a['diameter_km'] / b['diameter_km']:.1f}"}
+    return {"left": left, "right": right, "sides": [a, b], "ratio": f"{a['diameter_km'] / b['diameter_km']:.1f}"}
 
 
 @app.get("/", response_class=HTMLResponse)
