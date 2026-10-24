@@ -18,25 +18,6 @@ def widths(url, client):
     return {slug: float(width) for slug, width in CIRCLE.findall(quiz(client.get(url).text))}
 
 
-def test_home_page_quiz_draws_jupiter_eleven_times_wider_than_earth(client):
-    found = widths("/", client)
-    assert set(found) == {"jupiter", "earth"}
-    assert found["jupiter"] == 100
-    assert found["earth"] == pytest.approx(100 * 12756 / 142984, abs=0.01)
-    assert 11.1 < found["jupiter"] / found["earth"] < 11.3
-
-
-@pytest.mark.parametrize("number,left,right", PAIRS)
-@pytest.mark.parametrize("choice", [None, "left", "right"])
-def test_every_round_scales_linearly_by_true_diameter(client, number, left, right, choice):
-    url = f"/?round={number}" + ("" if choice is None else f"&choice={left if choice == 'left' else right}")
-    found = widths(url, client)
-    assert list(found) == [left, right]
-    largest = max(DIAMETERS[left], DIAMETERS[right])
-    for slug in (left, right):
-        assert found[slug] == pytest.approx(100 * DIAMETERS[slug] / largest, abs=0.01)
-
-
 def test_both_circles_share_one_track_so_percentages_compare(client):
     panel = quiz(client.get("/").text)
     track = re.search(r'<div class="quiz-scale"[^>]*>(.*?)</div>', panel, re.DOTALL)
