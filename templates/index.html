@@ -56,7 +56,12 @@
         <fieldset>
           <legend>Which planet has the larger diameter?</legend>
           {% for p in quiz.sides %}
+          {% if quiz.choice %}
+          {% set picked = p.name == quiz.choice.name %}
+          <button type="submit" name="choice" value="{{ p.name|lower }}" disabled aria-pressed="{{ "true" if picked else "false" }}">{{ p.name }}{% if picked %} <span class="quiz-pick">Your pick</span>{% endif %}</button>
+          {% else %}
           <button type="submit" name="choice" value="{{ p.name|lower }}">{{ p.name }}</button>
+          {% endif %}
           {% endfor %}
         </fieldset>
       </form>
@@ -72,7 +77,7 @@
       {% endif %}
       {% if quiz.choice %}
       <div class="quiz-answer" role="status">
-        <p><strong>{{ "Correct" if quiz.correct else "Try the next pair" }}</strong> — You chose {{ quiz.choice.name }}.</p>
+        <p><strong>{{ "Correct" if quiz.correct else "Not quite" }}</strong> — You chose {{ quiz.choice.name }}.</p>
         <ul>
           {% for p in quiz.sides %}
           <li>{{ p.name }}: {{ "{:,}".format(p.diameter_km) }} km</li>
