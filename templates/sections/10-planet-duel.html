@@ -26,6 +26,10 @@
         </figure>
         {% endfor %}
       </div>
-      <p class="duel-ratio" aria-live="polite">{{ duel.sides[0].name }}'s diameter is <strong>{{ duel.ratio }}</strong> times {{ duel.sides[1].name }}'s.</p>
+      {% if duel.same %}
+      <p class="duel-ratio" aria-live="polite">Both picks are {{ duel.big }}, so they are <strong>exactly the same size</strong>.</p>
+      {% else %}
+      <p class="duel-ratio" aria-live="polite">{{ duel.big }} is <strong>{{ duel.ratio }}</strong> times as wide as {{ duel.small }}.</p>
+      {% endif %}
       {% endif %}
     </section>

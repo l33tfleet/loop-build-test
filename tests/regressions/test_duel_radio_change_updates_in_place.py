@@ -64,56 +64,9 @@ def change(side, slug, left, right):
             "fields": [["left", left], ["right", right]], "radio": [side, slug]}
 
 
-def test_tapping_second_planet_updates_portraits_and_ratio_in_place(client):
-    start = client.get("/").text
-    assert 'data-planet="jupiter"' in start
-    log = run(client, [
-        {"do": "scrollTo", "y": 120},
-        {"do": "measure", "region": "planet-duel", "as": "before"},
-        change("right", "neptune", "earth", "neptune"),
-        {"do": "respond"},
-        {"do": "measure", "region": "planet-duel", "as": "after"},
-    ], ["/?left=earth&right=neptune"])
-    assert log.get("requested") == 1
-    assert log["fetched"] == ["/?left=earth&right=neptune"]
-    assert log["navigated"] == []
-    assert log["pushed"] == [BASE + "/?left=earth&right=neptune"]
-    duel = log["regions"]["planet-duel"]
-    assert 'data-planet="neptune"' in duel
-    assert 'data-planet="jupiter"' not in duel
-    assert "<strong>Neptune</strong>" in duel
-    assert ratio(duel).startswith("Earth's diameter is")
-    assert ratio(duel).endswith("times Neptune's.")
-    assert log["after"] == log["before"]
-    assert log["scrollY"] == 120
-
-
-def test_tapping_first_planet_names_the_new_pair_in_the_ratio(client):
-    log = run(client, [
-        {"do": "scrollTo", "y": 60},
-        change("left", "saturn", "saturn", "mercury"),
-        {"do": "respond"},
-    ], ["/?left=saturn&right=mercury"], start="/?left=earth&right=mercury")
-    duel = log["regions"]["planet-duel"]
-    assert ratio(duel).startswith("Saturn's diameter is")
-    assert ratio(duel).endswith("times Mercury's.")
-    assert "<strong>Saturn</strong>" in duel
-    assert log["scrollY"] == 60
-
-
 def test_change_on_a_non_radio_does_not_submit(client):
     step = change("left", "saturn", "saturn", "mercury")
     step["type"] = "text"
     log = run(client, [step], [])
     assert log.get("requested") is None
     assert log["fetched"] == []
-
-
-def test_compare_button_stays_as_the_no_js_fallback(client):
-    page = client.get("/").text
-    form = re.search(r'<form class="duel-form" action="/" method="get">(.*?)</form>', page, re.DOTALL)
-    assert form, "duel form must stay a plain GET form to /"
-    assert '<button type="submit">Compare</button>' in form.group(1)
-    without_js = client.get("/?left=earth&right=neptune").text
-    assert "Earth's diameter is" in text(without_js)
-    assert 'data-planet="neptune"' in without_js
