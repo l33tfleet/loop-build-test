@@ -14,7 +14,8 @@
   <main>
     <section class="diameter-scale" aria-labelledby="scale-title">
       <h2 id="scale-title">Diameter scale</h2>
-      <p class="scale-note">Each circle's diameter is the planet's diameter divided by {{ largest.name }}'s {{ "{:,}".format(largest.diameter_km) }} km, on one linear scale. The circles overlap on a shared baseline so sizes compare directly.</p>
+      <p class="scale-note" data-view="circles">Each circle's diameter is the planet's diameter divided by {{ largest.name }}'s {{ "{:,}".format(largest.diameter_km) }} km, on one linear scale. The circles overlap on a shared baseline so sizes compare directly.</p>
+      <p class="scale-note" data-view="bars">Each bar's length is the planet's diameter divided by {{ largest.name }}'s {{ "{:,}".format(largest.diameter_km) }} km, on one linear scale. The bars share a left edge so sizes compare directly.</p>
       <fieldset class="scale-views">
         <legend>View as</legend>
         <input class="scale-view" type="radio" name="scale-view" id="scale-view-circles" value="circles" checked>
