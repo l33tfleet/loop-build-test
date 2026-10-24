@@ -86,11 +86,13 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
               padding: 0; list-style: none; container-type: inline-size; }
 .scale-track { position: absolute; inset: 0; z-index: var(--z); display: flex; align-items: flex-end;
                justify-content: center; aspect-ratio: 1; pointer-events: none; }
-.scale-bar { display: block; aspect-ratio: 1; background: rgb(244 233 210 / 0.1); border: 1.5px solid var(--paper);
-             border-radius: 50%; }
+/* Opaque fill in the planet's own colour; the navy rim keeps overlapping circles apart. */
+.scale-bar { display: block; aspect-ratio: 1; border: 1.5px solid var(--navy); border-radius: 50%;
+             background: var(--planet-surface); }
 .scale-leader { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 20; overflow: visible; stroke: var(--muted); stroke-width: 1; }
 .scale-label { position: absolute; z-index: 30; display: flex; flex-direction: column; line-height: 1.2;
-               font-size: 0.8rem; text-shadow: 0 0 3px var(--navy), 0 0 3px var(--navy); white-space: nowrap; }
+               font-size: 0.8rem; text-shadow: 0 0 3px var(--navy), 0 0 3px var(--navy); white-space: nowrap;
+               padding: 0 4px; border-radius: 4px; background: var(--navy); }
 .scale-label--inside { left: 50%; top: calc(100% - var(--y) + 4%); transform: translateX(-50%); align-items: center; }
 .scale-label--above { left: 50%; bottom: calc(var(--y) + 1%); transform: translateX(-50%); align-items: center; }
 /* Leader labels sit LEADER_STEP (13%) of the frame apart; capping the font at 5cqi keeps two lines (2.4em) under that gap. */
@@ -112,13 +114,14 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
                                                       grid-column: 2; grid-row: 1; }
 .diameter-scale:has(#scale-view-bars:checked) .scale-rows .scale-bar,
 #scale-view-bars:checked ~ .scale-rows .scale-bar { aspect-ratio: auto; block-size: 14px; border-radius: 4px;
-                                                    background: var(--paper); }
+                                                    background: var(--planet); }
 .diameter-scale:has(#scale-view-bars:checked) .scale-rows .scale-leader,
 #scale-view-bars:checked ~ .scale-rows .scale-leader { display: none; }
 .diameter-scale:has(#scale-view-bars:checked) .scale-rows .scale-label,
 #scale-view-bars:checked ~ .scale-rows .scale-label { position: static; flex-direction: row; gap: 0 8px;
                                                       transform: none; font-size: 0.9rem; grid-column: 1; grid-row: 1;
-                                                      flex-wrap: wrap; justify-content: flex-end; min-width: 0; }
+                                                      flex-wrap: wrap; justify-content: flex-end; min-width: 0;
+                                                      padding: 0; background: none; }
 
 /* Rocky planet inset: the same shared-baseline circles, scaled to Earth so the small planets compare.
    Earth's label sits above its rim, so the frame leaves room for two label lines above it. */
@@ -130,11 +133,12 @@ main:has(#scale-view-bars:checked) .rocky-inset { display: none; }
               padding: 0; list-style: none; }
 .inset-track { position: absolute; inset: 0; z-index: var(--z); display: flex; align-items: flex-end;
                justify-content: center; pointer-events: none; }
-.inset-circle { display: block; aspect-ratio: 1; background: rgb(244 233 210 / 0.1); border: 1.5px solid var(--paper);
-                border-radius: 50%; }
+.inset-circle { display: block; aspect-ratio: 1; border: 1.5px solid var(--navy); border-radius: 50%;
+                background: var(--planet-surface); }
 .inset-label { position: absolute; z-index: 30; left: 50%; transform: translateX(-50%); display: flex;
                flex-direction: column; align-items: center; line-height: 1.2; font-size: 0.8rem;
-               text-shadow: 0 0 3px var(--navy), 0 0 3px var(--navy); white-space: nowrap; }
+               text-shadow: 0 0 3px var(--navy), 0 0 3px var(--navy); white-space: nowrap;
+               padding: 0 4px; border-radius: 4px; background: var(--navy); }
 .inset-label--inside { top: calc(100% - var(--y) + 4%); }
 .inset-label--above { bottom: calc(var(--y) + 1%); }
 .inset-name { color: var(--paper); font-weight: 600; }
@@ -160,7 +164,7 @@ main:has(#scale-view-bars:checked) .rocky-inset { display: none; }
 .duel-side { display: flex; flex-direction: column; min-inline-size: 0; margin: 0; text-align: center; }
 .duel-frame { display: flex; flex: 1; align-items: flex-end; justify-content: center; }
 .duel-portrait { display: block; flex: none; aspect-ratio: 1; border-radius: 50%;
-                 background: radial-gradient(circle at 35% 30%, var(--paper), #c98b4f 60%, #6b3f22); }
+                 background: radial-gradient(circle at 35% 30%, rgb(255 255 255 / 0.5), transparent 55%), var(--planet-surface); }
 .duel-side figcaption { margin-top: 8px; }
 .duel-side strong { display: block; color: var(--paper); font-size: 1.25rem; }
 .duel-ratio { margin: 16px 0 0; color: var(--paper); font-size: 1.5rem; text-align: center; }
@@ -189,8 +193,22 @@ main:has(#scale-view-bars:checked) .rocky-inset { display: none; }
 .quiz-side { display: flex; flex-direction: column; min-inline-size: 0; text-align: center; }
 .quiz-frame { display: flex; flex: 1; align-items: flex-end; justify-content: center; }
 .quiz-planet { display: block; flex: none; aspect-ratio: 1; border-radius: 50%;
-               background: radial-gradient(circle at 35% 30%, var(--paper), #c98b4f 60%, #6b3f22); }
+               background: radial-gradient(circle at 35% 30%, rgb(255 255 255 / 0.5), transparent 55%), var(--planet-surface); }
 /* Before a guess both circles are the same neutral size and colour, so they don't give the answer away. */
 .quiz-scale[data-scale="neutral"] .quiz-planet { background: radial-gradient(circle at 35% 30%, #8a96b8, #4a5679 70%); }
 .quiz-name { margin-top: 8px; color: var(--paper); font-weight: 600; }
 .quiz-scale-note { margin: 0 0 12px; color: var(--muted); font-size: 0.9rem; }
+
+/* Planet colours for every circle (and bar): each one at least 3:1 against the navy panels.
+   --planet is the base colour; --planet-surface is the fill, banded for the gas giants. */
+[data-planet] { --planet-surface: var(--planet); }
+[data-planet="mercury"] { --planet: #a8a29a; }
+[data-planet="venus"] { --planet: #e0b96a; }
+[data-planet="earth"] { --planet: #4f8fe0; }
+[data-planet="mars"] { --planet: #c8553a; }
+[data-planet="jupiter"] { --planet: #c9a57a;
+                          --planet-surface: repeating-linear-gradient(180deg, #e8d2aa 0 12%, #a8754a 12% 18%, #d9b88a 18% 30%); }
+[data-planet="saturn"] { --planet: #d9bf7f;
+                         --planet-surface: repeating-linear-gradient(180deg, #e9d6a2 0 20%, #c9aa68 20% 26%, #dcc386 26% 40%); }
+[data-planet="uranus"] { --planet: #7fd3dc; }
+[data-planet="neptune"] { --planet: #4a6fe3; }
