@@ -107,8 +107,8 @@ def test_home_header(home):
     header = page.one("header")
     assert header.one("h1").text == "Solar Arcade"
     assert header.one("p").text == (
-        "Compare the sizes of all eight planets on one scale, switch to a bar graph, "
-        "then see the four rocky planets zoomed in."
+        "Duel two planets by size, take the diameter quiz, find your planet birthdays, "
+        "then see all eight on one scale or as a bar graph."
     )
 
 
