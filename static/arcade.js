@@ -85,10 +85,26 @@
     if (form && form.requestSubmit) form.requestSubmit();
   });
 
+  // Bar graph view hides the rocky inset, so a jump to it switches the chart back to circles first.
+  function revealJumpTarget(hash) {
+    var target = hash.length > 1 && document.getElementById(decodeURIComponent(hash.slice(1)));
+    var bars = document.getElementById("scale-view-bars");
+    var circles = document.getElementById("scale-view-circles");
+    if (!target || !bars || !bars.checked || !circles || !target.closest(".rocky-inset")) return null;
+    circles.checked = true;
+    return target;
+  }
+
+  window.addEventListener("hashchange", function () {
+    var target = revealJumpTarget(window.location.hash);
+    if (target) target.scrollIntoView();
+  });
+
   document.addEventListener("click", function (event) {
     if (event.defaultPrevented || event.button !== 0) return;
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     var link = event.target.closest("a[href]");
+    if (link && link.hash && link.pathname === window.location.pathname) revealJumpTarget(link.hash);
     var origin = link && regionOf(link);
     var url = link && homeUrl(link.href);
     if (!origin || !url || link.target) return;

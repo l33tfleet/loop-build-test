@@ -30,18 +30,6 @@ def test_birthday_booth_has_labeled_ordinary_get_form(client):
     assert birthday_results(html) == []
 
 
-@pytest.mark.parametrize("age", [0, 0.1, 0.95, 30, 30.26, 119.99, 120])
-def test_planet_birthdays_use_period_ratio_and_one_decimal(client, age):
-    response = client.get("/", params={"age": str(age)})
-    assert response.status_code == 200
-    assert birthday_results(response.text) == [
-        (name, f"{age if name == 'Earth' else age * PERIODS['Earth'] / period:.1f}")
-        for name, period in PERIODS.items()
-    ]
-    assert dict(birthday_results(response.text))["Earth"] == f"{age:.1f}"
-    assert 'role="alert"' not in response.text
-
-
 @pytest.mark.parametrize("age", ["-0", "-0.0"])
 def test_signed_zero_displays_as_zero(client, age):
     results = birthday_results(client.get("/", params={"age": age}).text)

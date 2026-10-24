@@ -10,8 +10,18 @@
 <body>
   <header>
     <h1 data-marker="solar-arcade">Solar Arcade</h1>
-    <p class="tagline">Compare the sizes of all eight planets on one scale, switch to a bar graph, then see the four rocky planets zoomed in.</p>
+    <p class="tagline">Duel two planets by size, take the diameter quiz, find your planet birthdays, then see all eight on one scale or as a bar graph.</p>
   </header>
+  <nav aria-label="Sections" class="section-nav">
+    <ul>
+      <li><a href="#duel-title">Duel</a></li>
+      <li><a href="#quiz-title">Quiz</a></li>
+      <li><a href="#birthday-title">Birthdays</a></li>
+      <li><a href="#scale-title">Scale</a></li>
+      <li><a href="#inset-title">Rocky planets</a></li>
+      <li><a href="#shelf-title">Planets</a></li>
+    </ul>
+  </nav>
   <main>
     <section class="planet-duel" data-region="planet-duel" aria-labelledby="duel-title">
       <h2 id="duel-title">Planet size duel</h2>
@@ -60,7 +70,12 @@
         <fieldset>
           <legend>Which planet has the larger diameter?</legend>
           {% for p in quiz.sides %}
+          {% if quiz.choice %}
+          {% set picked = p.name == quiz.choice.name %}
+          <button type="submit" name="choice" value="{{ p.name|lower }}" disabled aria-pressed="{{ "true" if picked else "false" }}">{{ p.name }}{% if picked %} <span class="quiz-pick">Your pick</span>{% endif %}</button>
+          {% else %}
           <button type="submit" name="choice" value="{{ p.name|lower }}">{{ p.name }}</button>
+          {% endif %}
           {% endfor %}
         </fieldset>
       </form>
@@ -76,7 +91,7 @@
       {% endif %}
       {% if quiz.choice %}
       <div class="quiz-answer" role="status">
-        <p><strong>{{ "Correct" if quiz.correct else "Try the next pair" }}</strong> — You chose {{ quiz.choice.name }}.</p>
+        <p><strong>{{ "Correct" if quiz.correct else "Not quite" }}</strong> — You chose {{ quiz.choice.name }}.</p>
         <ul>
           {% for p in quiz.sides %}
           <li>{{ p.name }}: {{ "{:,}".format(p.diameter_km) }} km</li>
@@ -127,7 +142,7 @@
       <ol class="scale-rows">
         {% for p in scale %}
         <li class="scale-row" data-order="{{ p.order }}" style="--z: {{ p.z }}">
-          <span class="scale-track" aria-hidden="true"><span class="scale-bar" style="width: {{ p.width_pct }}%"></span></span>
+          <span class="scale-track" aria-hidden="true"><span class="scale-bar" data-planet="{{ p.name|lower }}" style="width: {{ p.width_pct }}%"></span></span>
           {% if p.label == "leader" %}
           <svg class="scale-leader" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="50" y1="{{ (100 - p.width_pct) | round(4) }}" x2="71" y2="{{ 100 - p.label_y }}" vector-effect="non-scaling-stroke"/></svg>
           {% endif %}
@@ -145,7 +160,7 @@
       <ol class="inset-rows">
         {% for p in rocky %}
         <li class="inset-row" data-order="{{ p.order }}" style="--z: {{ p.z }}">
-          <span class="inset-track" aria-hidden="true"><span class="inset-circle" style="width: {{ p.width_pct }}%"></span></span>
+          <span class="inset-track" aria-hidden="true"><span class="inset-circle" data-planet="{{ p.name|lower }}" style="width: {{ p.width_pct }}%"></span></span>
           <span class="inset-label inset-label--{{ p.label }}" style="--y: {{ p.label_y }}%">
             <span class="inset-name">{{ p.name }}</span>
             <span class="inset-value">{{ "{:,}".format(p.diameter_km) }} km</span>

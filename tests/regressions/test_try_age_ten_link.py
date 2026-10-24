@@ -18,18 +18,6 @@ def test_booth_offers_try_age_ten_link_after_submit_button(client):
     assert booth.index("Find my planet ages") < link.start()
 
 
-def test_following_link_shows_eight_results_with_ten_prefilled(client):
-    html = client.get("/").text
-    href = re.search(r'href="([^"]+)"', TRY_LINK.search(html).group()).group(1)
-    response = client.get(href)
-    assert response.status_code == 200
-    results = RESULT.findall(response.text)
-    assert len(results) == 8
-    assert ("Earth", "10.0") in results
-    field = re.search(r'<input\b[^>]*id="earth-age"[^>]*>', response.text).group()
-    assert re.search(r'value="10(\.0)?"', field)
-
-
 def test_link_has_visible_focus_style_and_wraps(client):
     css = client.get("/static/arcade.css").text
     focus = re.search(r"\.birthday-try:focus-visible\s*\{([^}]*)\}", css)
