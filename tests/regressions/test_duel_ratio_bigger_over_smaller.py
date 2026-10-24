@@ -46,6 +46,7 @@ def test_ratio_is_bigger_over_smaller_never_below_one(client, left, right):
     assert response.status_code == 200
     section = duel(response.text)
     assert selected(section, "left") == [left] and selected(section, "right") == [right]
+    assert f"{DIAMETERS[left]:,} km" in section and f"{DIAMETERS[right]:,} km" in section
     if left == right:
         return
     big, small = sorted((left, right), key=DIAMETERS.get, reverse=True)
