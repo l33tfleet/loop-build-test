@@ -38,6 +38,21 @@
         {% endfor %}
       </ol>
     </section>
+    <section class="rocky-inset" aria-labelledby="inset-title">
+      <h3 id="inset-title">Rocky planets, zoomed in</h3>
+      <p class="inset-note">Different scale from the chart above: here each circle's diameter is the planet's diameter divided by Earth's {{ "{:,}".format(earth.diameter_km) }} km, so Earth fills the panel width.</p>
+      <ol class="inset-rows">
+        {% for p in rocky %}
+        <li class="inset-row" data-order="{{ p.order }}" style="--z: {{ p.z }}">
+          <span class="inset-track" aria-hidden="true"><span class="inset-circle" style="width: {{ p.width_pct }}%"></span></span>
+          <span class="inset-label inset-label--{{ p.label }}" style="--y: {{ p.label_y }}%">
+            <span class="inset-name">{{ p.name }}</span>
+            <span class="inset-value">{{ "{:,}".format(p.diameter_km) }} km</span>
+          </span>
+        </li>
+        {% endfor %}
+      </ol>
+    </section>
     <section class="shelf" aria-label="Planet shelf">
       {% for p in planets %}
       <article class="planet-card" data-order="{{ p.order }}">
