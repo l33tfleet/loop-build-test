@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Solar Arcade</title>
   <link rel="stylesheet" href="/static/arcade.css">
+  <script src="/static/arcade.js" defer></script>
 </head>
 <body>
   <header>
@@ -12,7 +13,7 @@
     <p class="tagline">Compare the sizes of all eight planets on one scale, switch to a bar graph, then see the four rocky planets zoomed in.</p>
   </header>
   <main>
-    <section class="planet-duel" aria-labelledby="duel-title">
+    <section class="planet-duel" data-region="planet-duel" aria-labelledby="duel-title">
       <h2 id="duel-title">Planet size duel</h2>
       <form class="duel-form" action="/" method="get">
         {% for side, text in (("left", "First planet"), ("right", "Second planet")) %}
@@ -41,7 +42,7 @@
       <p class="duel-ratio" aria-live="polite">{{ duel.sides[0].name }}'s diameter is <strong>{{ duel.ratio }}</strong> times {{ duel.sides[1].name }}'s.</p>
       {% endif %}
     </section>
-    <section class="planet-quiz" aria-labelledby="quiz-title">
+    <section class="planet-quiz" data-region="planet-quiz" aria-labelledby="quiz-title">
       <h2 id="quiz-title">Planet diameter quiz</h2>
       {% if quiz.error %}
       <p role="alert">{{ quiz.error }}</p>
@@ -77,7 +78,7 @@
       {% endif %}
       {% endif %}
     </section>
-    <section class="birthday-booth" aria-labelledby="birthday-title">
+    <section class="birthday-booth" data-region="birthday-booth" aria-labelledby="birthday-title">
       <h2 id="birthday-title">Planet birthdays</h2>
       <p id="birthday-note">How many trips around the Sun? A toy year conversion, not a calendar-date calculation.</p>
       <form action="/" method="get">
@@ -143,7 +144,7 @@
         {% endfor %}
       </ol>
     </section>
-    <form class="shelf-sort" action="/" method="get">
+    <form class="shelf-sort" data-region="shelf-sort" action="/" method="get">
       <label for="planet-sort">Planet shelf order</label>
       <select id="planet-sort" name="sort">
         <option value="sun"{% if sort == "sun" %} selected{% endif %}>Sun order</option>
@@ -153,7 +154,7 @@
       {% if age != "" %}<input type="hidden" name="age" value="{{ age }}">{% endif %}
       <button type="submit">Apply order</button>
     </form>
-    <section class="planet-shelf" aria-labelledby="shelf-title">
+    <section class="planet-shelf" data-region="planet-shelf" aria-labelledby="shelf-title">
       <h2 id="shelf-title">The eight planets</h2>
       <p class="shelf-note">{{ {"sun": "In order from the Sun", "diameter": "Largest diameter first", "year": "Shortest year first"}[sort] }}</p>
       <div class="shelf">
