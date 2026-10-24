@@ -19,6 +19,18 @@ CROWDED = 12  # big circles whose tops are this close get labels on opposite sid
 LEADER_STEP = 13  # vertical spacing (% of frame) between leader-line labels; fits two text lines at 320px
 
 
+def _ordinal(n):
+    """1 -> '1st', 2 -> '2nd', 11 -> '11th', 23 -> '23rd'."""
+    suffix = "th" if 10 <= n % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+    return f"{n}{suffix}"
+
+
+def _earths(diameter_km, earth_km):
+    """Diameter in Earths to 2 significant figures: 0.38, 4.0, 11; Earth itself is exactly 1."""
+    ratio = diameter_km / earth_km
+    return "1" if ratio == 1 else f"{ratio:#.2g}".rstrip(".")
+
+
 def _place_labels(scale):
     """Label the overlapping circles: big ones on their rim, small ones on leader lines."""
     by_size = sorted(scale, key=lambda p: p["width_pct"], reverse=True)
@@ -36,7 +48,9 @@ def _place_labels(scale):
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
-    planets = sorted(SNAPSHOT["planets"], key=lambda p: p["order"])
+    earth = next(p for p in SNAPSHOT["planets"] if p["name"] == "Earth")
+    planets = [{**p, "ordinal": _ordinal(p["order"]), "earths": _earths(p["diameter_km"], earth["diameter_km"])}
+               for p in sorted(SNAPSHOT["planets"], key=lambda p: p["order"])]
     largest = max(planets, key=lambda p: p["diameter_km"])
     # Linear scale: each circle's diameter is diameter / largest diameter, so the largest planet fills the track.
     scale = [{**p, "width_pct": round(100 * p["diameter_km"] / largest["diameter_km"], 4)} for p in planets]
