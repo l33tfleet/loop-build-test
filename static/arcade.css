@@ -66,18 +66,20 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 .scale-note[data-view="bars"] { display: none; }
 .diameter-scale:has(#scale-view-bars:checked) .scale-note[data-view="circles"] { display: none; }
 .diameter-scale:has(#scale-view-bars:checked) .scale-note[data-view="bars"] { display: block; }
-/* View toggle: a borderless fieldset groups the visually hidden radios; the legend floats inline before the pills. */
-.scale-views { margin: 0 0 16px; padding: 0; border: 0; min-inline-size: 0; white-space: nowrap; }
-.scale-views legend { float: left; margin: 0 6px 0 0; padding: 6px 0; color: var(--muted); font-size: 0.8rem; line-height: 1.5; }
-.scale-view { position: absolute; opacity: 0; pointer-events: none; }
-.scale-view-label { display: inline-block; margin: 0 4px 0 0; padding: 4px 12px; border: 1px solid #24345e;
-                    border-radius: 999px; color: var(--muted); font-size: 0.9rem; cursor: pointer; }
-.scale-view:checked + .scale-view-label { border-color: var(--paper); color: var(--paper); background: #1b2b5c; }
+/* View toggle: a borderless fieldset groups the visually hidden radios; the floated legend becomes a flex item
+   before the pills, and the row wraps between whole pills (never inside one) when 390px is too narrow.
+   Each radio is pinned over its own pill, so focusing it on a tap never scrolls the page somewhere else. */
+.scale-views { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+               margin: 0 0 16px; padding: 0; border: 0; min-inline-size: 0; white-space: nowrap; }
+.scale-views legend { float: left; margin: 0; padding: 0; color: var(--ink); font-size: 1rem; line-height: 1.5; }
+.scale-view-pill { position: relative; display: inline-flex; }
+.scale-view { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; pointer-events: none; }
+.scale-view-label { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 16px;
+                    border: 1px solid var(--muted); border-radius: 999px; background: rgb(244 233 210 / 0.06);
+                    color: var(--ink); font-size: 1rem; cursor: pointer; }
+.scale-view:checked + .scale-view-label { border-color: var(--paper); background: #2c4482; font-weight: 600; }
+.scale-view:checked + .scale-view-label::before { content: "\2713"; color: var(--paper); }
 .scale-view:focus-visible + .scale-view-label { outline: 2px solid var(--paper); outline-offset: 2px; }
-/* Narrow phones (390px leaves ~324px inside the card): tighten the pills so legend and both pills share one row. */
-@media (max-width: 420px) {
-  .scale-view-label { padding: 4px 9px; font-size: 0.85rem; }
-}
 
 /* Overlapping circles: one square frame, every circle centred on the same bottom baseline, largest behind. */
 .scale-rows { position: relative; display: block; aspect-ratio: 1; width: min(100%, 440px); margin: 0 auto;

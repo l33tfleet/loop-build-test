@@ -130,10 +130,14 @@
       <p class="scale-note" data-view="bars">Each bar's length is the planet's diameter divided by {{ largest.name }}'s {{ "{:,}".format(largest.diameter_km) }} km, on one linear scale. The bars share a left edge so sizes compare directly.</p>
       <fieldset class="scale-views">
         <legend>View as</legend>
-        <input class="scale-view" type="radio" name="scale-view" id="scale-view-circles" value="circles" checked>
-        <label class="scale-view-label" for="scale-view-circles">Overlapping circles</label>
-        <input class="scale-view" type="radio" name="scale-view" id="scale-view-bars" value="bars">
-        <label class="scale-view-label" for="scale-view-bars">Bar graph</label>
+        <span class="scale-view-pill">
+          <input class="scale-view" type="radio" name="scale-view" id="scale-view-circles" value="circles" checked>
+          <label class="scale-view-label" for="scale-view-circles">Overlapping circles</label>
+        </span>
+        <span class="scale-view-pill">
+          <input class="scale-view" type="radio" name="scale-view" id="scale-view-bars" value="bars">
+          <label class="scale-view-label" for="scale-view-bars">Bar graph</label>
+        </span>
       </fieldset>
       <ol class="scale-rows">
         {% for p in scale %}
