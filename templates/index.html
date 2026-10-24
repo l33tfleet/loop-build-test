@@ -37,7 +37,8 @@
     </section>
     <section class="diameter-scale" aria-labelledby="scale-title">
       <h2 id="scale-title">Diameter scale</h2>
-      <p class="scale-note">Each circle's diameter is the planet's diameter divided by {{ largest.name }}'s {{ "{:,}".format(largest.diameter_km) }} km, on one linear scale. The circles overlap on a shared baseline so sizes compare directly.</p>
+      <p class="scale-note" data-view="circles">Each circle's diameter is the planet's diameter divided by {{ largest.name }}'s {{ "{:,}".format(largest.diameter_km) }} km, on one linear scale. The circles overlap on a shared baseline so sizes compare directly.</p>
+      <p class="scale-note" data-view="bars">Each bar's length is the planet's diameter divided by {{ largest.name }}'s {{ "{:,}".format(largest.diameter_km) }} km, on one linear scale. The bars share a left edge so sizes compare directly.</p>
       <fieldset class="scale-views">
         <legend>View as</legend>
         <input class="scale-view" type="radio" name="scale-view" id="scale-view-circles" value="circles" checked>
@@ -55,6 +56,21 @@
           <span class="scale-label scale-label--{{ p.label }}" style="--y: {{ p.label_y }}%">
             <span class="scale-name">{{ p.name }}</span>
             <span class="scale-value">{{ "{:,}".format(p.diameter_km) }} km</span>
+          </span>
+        </li>
+        {% endfor %}
+      </ol>
+    </section>
+    <section class="rocky-inset" aria-labelledby="inset-title">
+      <h3 id="inset-title">Rocky planets, zoomed in</h3>
+      <p class="inset-note">Different scale from the chart above: here each circle's diameter is the planet's diameter divided by Earth's {{ "{:,}".format(earth.diameter_km) }} km, so Earth fills the panel width.</p>
+      <ol class="inset-rows">
+        {% for p in rocky %}
+        <li class="inset-row" data-order="{{ p.order }}" style="--z: {{ p.z }}">
+          <span class="inset-track" aria-hidden="true"><span class="inset-circle" style="width: {{ p.width_pct }}%"></span></span>
+          <span class="inset-label inset-label--{{ p.label }}" style="--y: {{ p.label_y }}%">
+            <span class="inset-name">{{ p.name }}</span>
+            <span class="inset-value">{{ "{:,}".format(p.diameter_km) }} km</span>
           </span>
         </li>
         {% endfor %}

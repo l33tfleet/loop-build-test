@@ -22,6 +22,7 @@ ORBITAL_PERIOD_DAYS = {
 }
 LEADER_BELOW = 20  # circles under this % of the frame are too small to hold a label
 CROWDED = 12  # big circles whose tops are this close get labels on opposite sides of the rim
+ROCKY = ("Mercury", "Venus", "Earth", "Mars")  # zoomed inset, scaled to Earth instead of the largest planet
 LEADER_STEP = 13  # vertical spacing (% of frame) between leader-line labels; fits two text lines at 320px
 
 
@@ -61,7 +62,12 @@ def home(request: Request, age: str | None = None):
     # Linear scale: each circle's diameter is diameter / largest diameter, so the largest planet fills the track.
     scale = [{**p, "width_pct": round(100 * p["diameter_km"] / largest["diameter_km"], 4)} for p in planets]
     scale = _place_labels(scale)
-    context = {"planets": planets, "scale": scale, "largest": largest, "source": SNAPSHOT["source"]}
+    # Inset: the rocky planets on their own linear scale, diameter / Earth's diameter, so Earth fills the panel.
+    rocky = [{**p, "width_pct": round(100 * p["diameter_km"] / earth["diameter_km"], 4)}
+             for p in planets if p["name"] in ROCKY]
+    rocky = _place_labels(rocky)
+    context = {"planets": planets, "scale": scale, "largest": largest, "rocky": rocky, "earth": earth,
+               "source": SNAPSHOT["source"]}
     birthdays = []
     age_error = None
     if age is not None:

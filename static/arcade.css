@@ -33,11 +33,23 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 
 /* Cards keep a readable width on large screens. */
 .shelf { max-width: 960px; }
+/* Phones: two cards per row from ~376px up (390px gives 173px columns); 320px stays one column so text never wraps. */
+@media (max-width: 420px) {
+  .shelf { grid-template-columns: repeat(auto-fill, minmax(min(100%, 165px), 1fr)); gap: 12px; }
+  .planet-card { padding: 12px; }
+  .planet-card h2 { font-size: 1.2rem; }
+  .planet-card .diameter { font-size: 1.05rem; }
+  .planet-card .earths { font-size: 0.8rem; }
+}
 
 /* Diameter scale: one linear axis, circle diameter = diameter / largest diameter of a shared square track. */
 .diameter-scale { margin: 0 0 32px; padding: 16px; border: 1px solid #24345e; border-radius: 12px; background: #101b40; }
 .diameter-scale h2 { margin: 0 0 4px; color: var(--paper); font-size: 1.35rem; }
 .scale-note { margin: 0 0 16px; color: var(--muted); font-size: 0.9rem; }
+/* One note per view, switched by the same :has() as the chart; display: none keeps the other out of screen readers. */
+.scale-note[data-view="bars"] { display: none; }
+.diameter-scale:has(#scale-view-bars:checked) .scale-note[data-view="circles"] { display: none; }
+.diameter-scale:has(#scale-view-bars:checked) .scale-note[data-view="bars"] { display: block; }
 /* View toggle: a borderless fieldset groups the visually hidden radios; the legend floats inline before the pills. */
 .scale-views { margin: 0 0 16px; padding: 0; border: 0; min-inline-size: 0; white-space: nowrap; }
 .scale-views legend { float: left; margin: 0 6px 0 0; padding: 6px 0; color: var(--muted); font-size: 0.8rem; line-height: 1.5; }
@@ -86,3 +98,23 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 .diameter-scale:has(#scale-view-bars:checked) .scale-rows .scale-label,
 #scale-view-bars:checked ~ .scale-rows .scale-label { position: static; flex-direction: row; gap: 8px;
                                                       transform: none; font-size: 0.9rem; }
+
+/* Rocky planet inset: the same shared-baseline circles, scaled to Earth so the small planets compare.
+   Earth's label sits above its rim, so the frame leaves room for two label lines above it. */
+.rocky-inset { margin: -16px 0 32px; padding: 16px; border: 1px solid #24345e; border-radius: 12px; background: #101b40; }
+main:has(#scale-view-bars:checked) .rocky-inset { display: none; }
+.rocky-inset h3 { margin: 0 0 4px; color: var(--paper); font-size: 1.1rem; }
+.inset-note { margin: 0; color: var(--muted); font-size: 0.9rem; }
+.inset-rows { position: relative; display: block; aspect-ratio: 1; width: min(100%, 320px); margin: 2.5rem auto 0;
+              padding: 0; list-style: none; }
+.inset-track { position: absolute; inset: 0; z-index: var(--z); display: flex; align-items: flex-end;
+               justify-content: center; pointer-events: none; }
+.inset-circle { display: block; aspect-ratio: 1; background: rgb(244 233 210 / 0.1); border: 1.5px solid var(--paper);
+                border-radius: 50%; }
+.inset-label { position: absolute; z-index: 30; left: 50%; transform: translateX(-50%); display: flex;
+               flex-direction: column; align-items: center; line-height: 1.2; font-size: 0.8rem;
+               text-shadow: 0 0 3px var(--navy), 0 0 3px var(--navy); white-space: nowrap; }
+.inset-label--inside { top: calc(100% - var(--y) + 4%); }
+.inset-label--above { bottom: calc(var(--y) + 1%); }
+.inset-name { color: var(--paper); font-weight: 600; }
+.inset-value { font-variant-numeric: tabular-nums; }
