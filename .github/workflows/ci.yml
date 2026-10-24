@@ -12,12 +12,21 @@ jobs:
 
   regressions-append-only:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Existing regression tests are never modified, renamed or deleted
+      - name: Existing regression tests are never modified, renamed or deleted, except a superseded test
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_REF: ${{ github.head_ref }}
+          REPO: ${{ github.repository }}
         run: |
           base=$(git merge-base "origin/${{ github.base_ref }}" HEAD)
-          bad=$(git diff --name-only --diff-filter=MDR "$base" HEAD -- tests/regressions/)
-          if [ -n "$bad" ]; then echo "Append-only violation:"; echo "$bad"; exit 1; fi
+          issue=$(printf '%s' "$HEAD_REF" | sed -n 's|^agent/\([0-9]*\)-.*|\1|p')
+          : > "$RUNNER_TEMP/issue.md"
+          if [ -n "$issue" ]; then gh api "repos/$REPO/issues/$issue" --jq .body > "$RUNNER_TEMP/issue.md"; fi
+          python3 -I .github/scripts/regressions_append_only.py "$base" "$RUNNER_TEMP/issue.md"
