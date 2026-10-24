@@ -167,3 +167,11 @@ main:has(#scale-view-bars:checked) .rocky-inset { display: none; }
 .quiz-answer p { margin: 4px 0; }
 .quiz-answer ul { padding-left: 20px; font-variant-numeric: tabular-nums; }
 .planet-quiz [role="alert"] { color: #ffd3c6; }
+/* Quiz drawing: equal columns share one bottom baseline; circle width = diameter / larger diameter, no floor. */
+.quiz-scale { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 480px; margin: 4px 0 8px; }
+.quiz-side { display: flex; flex-direction: column; min-inline-size: 0; text-align: center; }
+.quiz-frame { display: flex; flex: 1; align-items: flex-end; justify-content: center; }
+.quiz-planet { display: block; flex: none; aspect-ratio: 1; border-radius: 50%;
+               background: radial-gradient(circle at 35% 30%, var(--paper), #c98b4f 60%, #6b3f22); }
+.quiz-name { margin-top: 8px; color: var(--paper); font-weight: 600; }
+.quiz-scale-note { margin: 0 0 12px; color: var(--muted); font-size: 0.9rem; }
