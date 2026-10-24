@@ -7,18 +7,22 @@ is fine). The labeler separately holds any net loss of asserts.
 
 Usage: regressions_append_only.py BASE_SHA ISSUE_BODY_FILE
 """
-import ast, re, subprocess, sys
+import ast
+import re
+import subprocess
+import sys
 from collections import Counter
+from pathlib import Path
 
 DIR = "tests/regressions/"
+SUPERSEDES = re.compile(r"^Supersedes: (\S+\.py)::(\w+)", re.MULTILINE)
 
 
 def git(*args):
     return subprocess.run(["git", *args], check=True, capture_output=True, text=True).stdout
 
 
-def problems(base, issue_body):
-    allowed = set(re.findall(r"^Supersedes: (\S+\.py)::(\w+)", issue_body, re.MULTILINE))
+def problems(base, allowed):
     out = []
     for line in git("diff", "--name-status", "--no-renames", base, "HEAD", "--", DIR).splitlines():
         status, path = line.split("\t", 1)
@@ -44,11 +48,9 @@ def problems(base, issue_body):
 
 
 if __name__ == "__main__":
-    bad = problems(sys.argv[1], open(sys.argv[2]).read())
+    allowed = set(SUPERSEDES.findall(Path(sys.argv[2]).read_text()))
+    bad = problems(sys.argv[1], allowed)
     if bad:
         print("Append-only violation:\n" + "\n".join(bad))
         sys.exit(1)
-    print("Regression tests: append-only (superseded: "
-          + (", ".join(sorted(f"{p}::{t}" for p, t in set(re.findall(r"^Supersedes: (\S+\.py)::(\w+)",
-                                                                       open(sys.argv[2]).read(), re.M)))) or "none")
-          + ")")
+    print(f"Regression tests: append-only (superseded: {', '.join(sorted(f'{p}::{t}' for p, t in allowed)) or 'none'})")
