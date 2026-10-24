@@ -167,6 +167,10 @@ main:has(#scale-view-bars:checked) .rocky-inset { display: none; }
 .planet-quiz button, .quiz-next { display: inline-block; max-width: 100%; margin: 0 8px 8px 0; padding: 10px 16px;
                                border: 1px solid var(--muted); border-radius: 6px; background: var(--paper);
                                color: var(--navy); font: inherit; cursor: pointer; }
+.planet-quiz button:disabled { background: #8a96b8; border-color: #8a96b8; cursor: default; }
+.planet-quiz button[aria-pressed="true"] { background: var(--paper); border: 3px solid #b3ceff; font-weight: 700; }
+.quiz-pick { margin-left: 6px; padding: 1px 6px; border-radius: 4px; background: var(--navy); color: var(--paper);
+             font-size: 0.8rem; font-weight: 600; }
 .planet-quiz :focus-visible { outline: 3px solid #b3ceff; outline-offset: 3px; }
 .quiz-answer { margin: 12px 0; padding: 12px 16px; background: var(--navy); border-radius: 8px; }
 .quiz-answer p { margin: 4px 0; }
