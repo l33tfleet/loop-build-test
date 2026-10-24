@@ -12,6 +12,19 @@
     <p class="tagline">A pocket-sized planet playground.</p>
   </header>
   <main>
+    <section class="diameter-scale" aria-labelledby="scale-title">
+      <h2 id="scale-title">Diameter scale</h2>
+      <p class="scale-note">Bar length is each diameter divided by {{ largest.name }}'s {{ "{:,}".format(largest.diameter_km) }} km, on one linear scale.</p>
+      <ol class="scale-rows">
+        {% for p in scale %}
+        <li class="scale-row" data-order="{{ p.order }}">
+          <span class="scale-name">{{ p.name }}</span>
+          <span class="scale-track" aria-hidden="true"><span class="scale-bar" style="width: {{ p.width_pct }}%"></span></span>
+          <span class="scale-value">{{ "{:,}".format(p.diameter_km) }} km</span>
+        </li>
+        {% endfor %}
+      </ol>
+    </section>
     <section class="shelf" aria-label="Planet shelf">
       {% for p in planets %}
       <article class="planet-card" data-order="{{ p.order }}">

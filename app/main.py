@@ -19,7 +19,11 @@ SNAPSHOT = json.loads((ROOT / "data" / "planets.json").read_text())
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     planets = sorted(SNAPSHOT["planets"], key=lambda p: p["order"])
-    return templates.TemplateResponse(request, "index.html", {"planets": planets, "source": SNAPSHOT["source"]})
+    largest = max(planets, key=lambda p: p["diameter_km"])
+    # Linear scale: each bar is diameter / largest diameter, so the largest planet fills the track.
+    scale = [{**p, "width_pct": round(100 * p["diameter_km"] / largest["diameter_km"], 4)} for p in planets]
+    context = {"planets": planets, "scale": scale, "largest": largest, "source": SNAPSHOT["source"]}
+    return templates.TemplateResponse(request, "index.html", context)
 
 
 @app.get("/healthz")
