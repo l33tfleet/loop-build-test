@@ -1,0 +1,35 @@
+    <section class="planet-duel" data-region="planet-duel" aria-labelledby="duel-title">
+      <h2 id="duel-title">Planet size duel</h2>
+      <form class="duel-form" action="/" method="get">
+        {% for side, text in (("left", "First planet"), ("right", "Second planet")) %}
+        <fieldset class="duel-field"{% if duel.error %} aria-describedby="duel-error"{% endif %}>
+          <legend>{{ text }}</legend>
+          {% for p in planets|sort(attribute="order") %}
+          {% set slug = p.name|lower %}
+          <span class="duel-radio-pair">
+            <input type="radio" id="duel-{{ side }}-{{ slug }}" name="{{ side }}" value="{{ slug }}"{% if duel[side] == slug %} checked{% endif %}>
+            <label for="duel-{{ side }}-{{ slug }}">{{ p.name }}</label>
+          </span>
+          {% endfor %}
+        </fieldset>
+        {% endfor %}
+        <button type="submit">Compare</button>
+      </form>
+      {% if duel.error %}
+      <p id="duel-error" role="alert">{{ duel.error }}</p>
+      {% else %}
+      <div class="duel-portraits">
+        {% for p in duel.sides %}
+        <figure class="duel-side">
+          <span class="duel-frame" aria-hidden="true"><span class="duel-portrait" data-planet="{{ p.name|lower }}" style="width: {{ p.width_pct }}%"></span></span>
+          <figcaption><strong>{{ p.name }}</strong> <span>{{ "{:,}".format(p.diameter_km) }} km</span></figcaption>
+        </figure>
+        {% endfor %}
+      </div>
+      {% if duel.same %}
+      <p class="duel-ratio" aria-live="polite">Both picks are {{ duel.big }}, so they are <strong>exactly the same size</strong>.</p>
+      {% else %}
+      <p class="duel-ratio" aria-live="polite">{{ duel.big }} is <strong>{{ duel.ratio }}</strong> times as wide as {{ duel.small }}.</p>
+      {% endif %}
+      {% endif %}
+    </section>

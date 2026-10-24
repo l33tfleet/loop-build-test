@@ -1,0 +1,25 @@
+    <form class="shelf-sort" data-region="shelf-sort" action="/" method="get">
+      <label for="planet-sort">Planet shelf order</label>
+      <select id="planet-sort" name="sort">
+        <option value="sun"{% if sort == "sun" %} selected{% endif %}>Sun order</option>
+        <option value="diameter"{% if sort == "diameter" %} selected{% endif %}>Largest diameter first</option>
+        <option value="year"{% if sort == "year" %} selected{% endif %}>Shortest year first</option>
+      </select>
+      {% if age %}<input type="hidden" name="age" value="{{ age }}">{% endif %}
+      <button type="submit">Apply order</button>
+    </form>
+    <section class="planet-shelf" data-region="planet-shelf" aria-labelledby="shelf-title">
+      <h2 id="shelf-title">The eight planets</h2>
+      <p class="shelf-note">{{ {"sun": "In order from the Sun", "diameter": "Largest diameter first", "year": "Shortest year first"}[sort] }}</p>
+      <div class="shelf">
+      {% for p in shelf %}
+      <article class="planet-card" data-order="{{ p.order }}">
+        <h2>{{ p.name }}</h2>
+        <p class="order">{{ p.ordinal }} from the Sun</p>
+        <p class="label">Diameter</p>
+        <p class="diameter">{{ "{:,}".format(p.diameter_km) }} km</p>
+        <p class="earths">About {{ p.earths }} Earth{{ "" if p.earths == "1" else "s" }} wide</p>
+      </article>
+      {% endfor %}
+      </div>
+    </section>

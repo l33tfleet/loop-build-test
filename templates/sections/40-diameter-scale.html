@@ -1,0 +1,30 @@
+    <section class="diameter-scale" aria-labelledby="scale-title">
+      <h2 id="scale-title">Diameter scale</h2>
+      <p class="scale-note" data-view="circles">Each circle's diameter is the planet's diameter divided by {{ largest.name }}'s {{ "{:,}".format(largest.diameter_km) }} km, on one linear scale. The circles overlap on a shared baseline so sizes compare directly.</p>
+      <p class="scale-note" data-view="bars">Each bar's length is the planet's diameter divided by {{ largest.name }}'s {{ "{:,}".format(largest.diameter_km) }} km, on one linear scale. The bars share a left edge so sizes compare directly.</p>
+      <fieldset class="scale-views">
+        <legend>View as</legend>
+        <span class="scale-view-pill">
+          <input class="scale-view" type="radio" name="scale-view" id="scale-view-circles" value="circles" checked>
+          <label class="scale-view-label" for="scale-view-circles">Overlapping circles</label>
+        </span>
+        <span class="scale-view-pill">
+          <input class="scale-view" type="radio" name="scale-view" id="scale-view-bars" value="bars">
+          <label class="scale-view-label" for="scale-view-bars">Bar graph</label>
+        </span>
+      </fieldset>
+      <ol class="scale-rows">
+        {% for p in scale %}
+        <li class="scale-row" data-order="{{ p.order }}" style="--z: {{ p.z }}">
+          <span class="scale-track" aria-hidden="true"><span class="scale-bar" data-planet="{{ p.name|lower }}" style="width: {{ p.width_pct }}%"></span></span>
+          {% if p.label == "leader" %}
+          <svg class="scale-leader" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="50" y1="{{ (100 - p.width_pct) | round(4) }}" x2="71" y2="{{ 100 - p.label_y }}" vector-effect="non-scaling-stroke"/></svg>
+          {% endif %}
+          <span class="scale-label scale-label--{{ p.label }}" style="--y: {{ p.label_y }}%">
+            <span class="scale-name">{{ p.name }}</span>
+            <span class="scale-value">{{ "{:,}".format(p.diameter_km) }} km</span>
+          </span>
+        </li>
+        {% endfor %}
+      </ol>
+    </section>
