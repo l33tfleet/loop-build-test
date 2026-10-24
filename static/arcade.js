@@ -24,7 +24,11 @@
     return region.querySelector("button, a[href], input, select");
   }
 
+  // Only the latest tap or back/forward may change the page; slower earlier responses are dropped.
+  var latest = 0;
+
   async function update(url, origin, push) {
+    var ticket = ++latest;
     var name = origin.getAttribute("data-region");
     var focused = origin.contains(document.activeElement) ? document.activeElement : null;
     var doc;
@@ -32,9 +36,10 @@
       var response = await fetch(url, { headers: { Accept: "text/html" } });
       doc = new DOMParser().parseFromString(await response.text(), "text/html");
     } catch (error) {
-      window.location.assign(url);
+      if (ticket === latest) window.location.assign(url);
       return;
     }
+    if (ticket !== latest) return;
     if (!doc.querySelector('[data-region="' + name + '"]')) {
       window.location.assign(url);
       return;
