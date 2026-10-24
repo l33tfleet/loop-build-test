@@ -66,16 +66,15 @@
           {% endfor %}
         </ul>
         <p>{{ quiz.winner.name }} has the larger diameter.</p>
-        <p class="quiz-scale-note">Drawn to scale: each circle's width is the planet's diameter divided by {{ quiz.winner.name }}'s.</p>
-        <div class="quiz-scale">
-          {% for p in quiz.sides %}
-          <figure class="quiz-side">
-            <span class="quiz-frame" aria-hidden="true"><span class="quiz-planet" data-planet="{{ p.name|lower }}" style="width: {{ p.width_pct }}%"></span></span>
-            <figcaption>{{ p.name }}</figcaption>
-          </figure>
-          {% endfor %}
-        </div>
       </div>
+      {% endif %}
+      <div class="quiz-scale">
+        {% for p in quiz.sides %}
+        <span class="quiz-side"><span class="quiz-frame" aria-hidden="true"><span class="quiz-planet" data-planet="{{ p.name|lower }}" style="width: {{ p.width_pct }}%"></span></span><span class="quiz-name">{{ p.name }}</span></span>
+        {% endfor %}
+      </div>
+      <p class="quiz-scale-note">Drawn to scale: each circle's width is the planet's diameter divided by the larger one's.</p>
+      {% if quiz.choice %}
       <a class="quiz-next" href="/?round={{ quiz.next }}">Next</a>
       {% endif %}
       {% endif %}

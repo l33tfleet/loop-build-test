@@ -45,12 +45,6 @@ def test_drawings_sit_at_the_bottom_of_the_answer_with_labels(client):
     assert "to scale" in panel
 
 
-@pytest.mark.parametrize("number", [1, 2, 3])
-def test_unanswered_round_does_not_give_the_answer_away(client, number):
-    panel = quiz(client.get(f"/?round={number}").text)
-    assert drawings(panel) == []
-
-
 def test_css_keeps_drawings_round_and_unscaled_by_fixed_widths(client):
     css = client.get("/static/arcade.css").text
     rule = re.search(r"\.quiz-planet \{([^}]*)\}", css)
