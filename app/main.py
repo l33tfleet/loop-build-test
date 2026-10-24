@@ -54,10 +54,17 @@ def _place_labels(scale):
 
 
 @app.get("/", response_class=HTMLResponse)
-def home(request: Request, age: str | None = None):
+def home(request: Request, age: str | None = None, sort: str = "sun"):
+    sort_keys = {
+        "sun": lambda p: (p["order"], p["name"].lower()),
+        "diameter": lambda p: (-p["diameter_km"], p["name"].lower()),
+        "year": lambda p: (ORBITAL_PERIOD_DAYS[p["name"]], p["name"].lower()),
+    }
+    if sort not in sort_keys:
+        sort = "sun"
     earth = next(p for p in SNAPSHOT["planets"] if p["name"] == "Earth")
     planets = [{**p, "ordinal": _ordinal(p["order"]), "earths": _earths(p["diameter_km"], earth["diameter_km"])}
-               for p in sorted(SNAPSHOT["planets"], key=lambda p: p["order"])]
+               for p in sorted(SNAPSHOT["planets"], key=sort_keys["sun"])]
     largest = max(planets, key=lambda p: p["diameter_km"])
     # Linear scale: each circle's diameter is diameter / largest diameter, so the largest planet fills the track.
     scale = [{**p, "width_pct": round(100 * p["diameter_km"] / largest["diameter_km"], 4)} for p in planets]
@@ -66,7 +73,8 @@ def home(request: Request, age: str | None = None):
     rocky = [{**p, "width_pct": round(100 * p["diameter_km"] / earth["diameter_km"], 4)}
              for p in planets if p["name"] in ROCKY]
     rocky = _place_labels(rocky)
-    context = {"planets": planets, "scale": scale, "largest": largest, "rocky": rocky, "earth": earth,
+    context = {"planets": sorted(planets, key=sort_keys[sort]), "sort": sort,
+               "scale": scale, "largest": largest, "rocky": rocky, "earth": earth,
                "source": SNAPSHOT["source"]}
     birthdays = []
     age_error = None
