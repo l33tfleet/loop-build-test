@@ -32,6 +32,9 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 .birthday-controls input { width: 10rem; max-width: 100%; background: var(--navy); color: var(--paper); }
 .birthday-controls button { background: var(--paper); color: var(--navy); cursor: pointer; }
 .birthday-controls :focus-visible { outline: 3px solid #b3ceff; outline-offset: 3px; }
+/* One-tap example under the button: reuses the GET path with age=10. */
+.birthday-try { display: inline-block; margin-top: 10px; padding: 4px 0; color: var(--paper); overflow-wrap: anywhere; }
+.birthday-try:focus-visible { outline: 3px solid #b3ceff; outline-offset: 3px; border-radius: 2px; }
 .birthday-results { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: 12px; padding: 0; margin: 20px 0 0; list-style: none; }
 .birthday-result { padding: 12px; background: var(--navy); border-radius: 8px; }
 .birthday-result > span:first-child { display: block; color: var(--paper); }

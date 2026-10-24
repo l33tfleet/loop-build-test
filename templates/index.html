@@ -52,6 +52,7 @@
                  value="{{ age }}" aria-describedby="birthday-note{% if age_error %} age-error{% endif %}"{% if age_error %} aria-invalid="true"{% endif %}>
           <button type="submit">Find my planet ages</button>
         </div>
+        <a class="birthday-try" href="/?age=10">or try age 10</a>
       </form>
       {% if age_error %}<p id="age-error" role="alert">{{ age_error }}</p>{% endif %}
       {% if birthdays %}
