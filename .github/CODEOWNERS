@@ -1,7 +1,7 @@
-/tests/                 @jplexmurphy
+/tests/                 @k7lim
 /tests/regressions/
-conftest.py             @jplexmurphy
-pyproject.toml          @jplexmurphy
-/.github/               @jplexmurphy
-/Makefile               @jplexmurphy
-/AGENTS.md              @jplexmurphy
+conftest.py             @k7lim
+pyproject.toml          @k7lim
+/.github/               @k7lim
+/Makefile               @k7lim
+/AGENTS.md              @k7lim
