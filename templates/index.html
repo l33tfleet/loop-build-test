@@ -16,6 +16,7 @@
       <h2 id="birthday-title">Planet birthdays</h2>
       <p id="birthday-note">How many trips around the Sun? A toy year conversion, not a calendar-date calculation.</p>
       <form action="/" method="get">
+        <input type="hidden" name="sort" value="{{ sort }}">
         <label for="earth-age">Earth age (years)</label>
         <div class="birthday-controls">
           <input id="earth-age" name="age" type="number" min="0" max="120" step="any" required
@@ -76,9 +77,19 @@
         {% endfor %}
       </ol>
     </section>
+    <form class="shelf-sort" action="/" method="get">
+      <label for="planet-sort">Planet shelf order</label>
+      <select id="planet-sort" name="sort">
+        <option value="sun"{% if sort == "sun" %} selected{% endif %}>Sun order</option>
+        <option value="diameter"{% if sort == "diameter" %} selected{% endif %}>Largest diameter first</option>
+        <option value="year"{% if sort == "year" %} selected{% endif %}>Shortest year first</option>
+      </select>
+      {% if age != "" %}<input type="hidden" name="age" value="{{ age }}">{% endif %}
+      <button type="submit">Apply order</button>
+    </form>
     <section class="planet-shelf" aria-labelledby="shelf-title">
       <h2 id="shelf-title">The eight planets</h2>
-      <p class="shelf-note">In order from the Sun</p>
+      <p class="shelf-note">{{ {"sun": "In order from the Sun", "diameter": "Largest diameter first", "year": "Shortest year first"}[sort] }}</p>
       <div class="shelf">
       {% for p in planets %}
       <article class="planet-card" data-order="{{ p.order }}">

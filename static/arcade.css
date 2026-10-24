@@ -15,6 +15,13 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 .planet-card .earths { margin: 4px 0 0; color: var(--muted); font-size: 0.9rem; }
 .source { max-width: 960px; margin: 24px auto 0; color: var(--muted); font-size: 0.9rem; overflow-wrap: anywhere; }
 .source a { color: var(--paper); }
+.shelf-sort { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 0 0 16px; }
+.shelf-sort label { font-weight: 600; }
+.shelf-sort select, .shelf-sort button { max-width: 100%; padding: 10px 12px; border: 1px solid var(--muted);
+                                      border-radius: 6px; font: inherit; }
+.shelf-sort select { background: var(--navy); color: var(--paper); }
+.shelf-sort button { background: var(--paper); color: var(--navy); cursor: pointer; }
+.shelf-sort :focus-visible { outline: 3px solid #b3ceff; outline-offset: 3px; }
 
 .birthday-booth { margin-bottom: 24px; padding: 20px; border: 1px solid #536694; border-radius: 12px; background: #13204a; }
 .birthday-booth h2 { margin: 0; color: var(--paper); }
