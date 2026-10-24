@@ -1,4 +1,4 @@
-    <section class="planet-duel" aria-labelledby="duel-title">
+    <section class="planet-duel" data-region="planet-duel" aria-labelledby="duel-title">
       <h2 id="duel-title">Planet size duel</h2>
       <form class="duel-form" action="/" method="get">
         {% for side, text in (("left", "First planet"), ("right", "Second planet")) %}
@@ -6,8 +6,10 @@
           <legend>{{ text }}</legend>
           {% for p in planets|sort(attribute="order") %}
           {% set slug = p.name|lower %}
-          <input type="radio" id="duel-{{ side }}-{{ slug }}" name="{{ side }}" value="{{ slug }}"{% if duel[side] == slug %} checked{% endif %}>
-          <label for="duel-{{ side }}-{{ slug }}">{{ p.name }}</label>
+          <span class="duel-radio-pair">
+            <input type="radio" id="duel-{{ side }}-{{ slug }}" name="{{ side }}" value="{{ slug }}"{% if duel[side] == slug %} checked{% endif %}>
+            <label for="duel-{{ side }}-{{ slug }}">{{ p.name }}</label>
+          </span>
           {% endfor %}
         </fieldset>
         {% endfor %}

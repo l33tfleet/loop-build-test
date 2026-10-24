@@ -1,4 +1,4 @@
-    <form class="shelf-sort" action="/" method="get">
+    <form class="shelf-sort" data-region="shelf-sort" action="/" method="get">
       <label for="planet-sort">Planet shelf order</label>
       <select id="planet-sort" name="sort">
         <option value="sun"{% if sort == "sun" %} selected{% endif %}>Sun order</option>
@@ -8,7 +8,7 @@
       {% if age %}<input type="hidden" name="age" value="{{ age }}">{% endif %}
       <button type="submit">Apply order</button>
     </form>
-    <section class="planet-shelf" aria-labelledby="shelf-title">
+    <section class="planet-shelf" data-region="planet-shelf" aria-labelledby="shelf-title">
       <h2 id="shelf-title">The eight planets</h2>
       <p class="shelf-note">{{ {"sun": "In order from the Sun", "diameter": "Largest diameter first", "year": "Shortest year first"}[sort] }}</p>
       <div class="shelf">

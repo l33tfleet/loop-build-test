@@ -94,23 +94,26 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 .scale-value { font-variant-numeric: tabular-nums; }
 
 /* Bar graph view: the same rows laid out as horizontal bars on one linear axis.
+   The label is placed in the first (9rem) column, right-aligned against its bar, and wraps the km under the name if needed.
    The radios now live inside the fieldset, so :has() on the section does the switching; the trailing
    sibling selectors no longer match and are kept only because tests/regressions/test_overlap_scale.py pins them. */
 .diameter-scale:has(#scale-view-bars:checked) .scale-rows,
 #scale-view-bars:checked ~ .scale-rows { display: grid; gap: 8px; aspect-ratio: auto; width: auto; }
 .diameter-scale:has(#scale-view-bars:checked) .scale-rows .scale-row,
-#scale-view-bars:checked ~ .scale-rows .scale-row { display: grid; grid-template-columns: minmax(0, 1fr) 7.5rem;
+#scale-view-bars:checked ~ .scale-rows .scale-row { display: grid; grid-template-columns: 9rem minmax(0, 1fr);
                                                      align-items: center; gap: 12px; }
 .diameter-scale:has(#scale-view-bars:checked) .scale-rows .scale-track,
-#scale-view-bars:checked ~ .scale-rows .scale-track { position: static; display: block; aspect-ratio: auto; }
+#scale-view-bars:checked ~ .scale-rows .scale-track { position: static; display: block; aspect-ratio: auto;
+                                                      grid-column: 2; grid-row: 1; }
 .diameter-scale:has(#scale-view-bars:checked) .scale-rows .scale-bar,
 #scale-view-bars:checked ~ .scale-rows .scale-bar { aspect-ratio: auto; block-size: 14px; border-radius: 4px;
                                                     background: var(--paper); }
 .diameter-scale:has(#scale-view-bars:checked) .scale-rows .scale-leader,
 #scale-view-bars:checked ~ .scale-rows .scale-leader { display: none; }
 .diameter-scale:has(#scale-view-bars:checked) .scale-rows .scale-label,
-#scale-view-bars:checked ~ .scale-rows .scale-label { position: static; flex-direction: row; gap: 8px;
-                                                      transform: none; font-size: 0.9rem; }
+#scale-view-bars:checked ~ .scale-rows .scale-label { position: static; flex-direction: row; gap: 0 8px;
+                                                      transform: none; font-size: 0.9rem; grid-column: 1; grid-row: 1;
+                                                      flex-wrap: wrap; justify-content: flex-end; min-width: 0; }
 
 /* Rocky planet inset: the same shared-baseline circles, scaled to Earth so the small planets compare.
    Earth's label sits above its rim, so the frame leaves room for two label lines above it. */
@@ -138,6 +141,10 @@ main:has(#scale-view-bars:checked) .rocky-inset { display: none; }
 .duel-field { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 4px; margin: 0; padding: 8px 12px 12px;
               border: 1px solid #536694; border-radius: 8px; }
 .duel-field legend { padding: 0 4px; font-weight: 600; }
+/* One outlined pill per radio and name, so the pair reads (and wraps) as a single button. */
+.duel-radio-pair { display: inline-flex; align-items: center; white-space: nowrap; padding-left: 8px;
+                   border: 1px solid var(--muted); border-radius: 999px; background: rgb(244 233 210 / 0.08); }
+.duel-radio-pair:has(input:checked) { border-color: var(--paper); }
 .duel-field label { padding: 4px 10px 4px 2px; }
 .duel-field input:checked + label { color: var(--paper); font-weight: 600; }
 .duel-form button { max-width: 100%; padding: 10px 12px; border: 1px solid var(--muted); border-radius: 6px; font: inherit;
@@ -163,6 +170,10 @@ main:has(#scale-view-bars:checked) .rocky-inset { display: none; }
 .planet-quiz button, .quiz-next { display: inline-block; max-width: 100%; margin: 0 8px 8px 0; padding: 10px 16px;
                                border: 1px solid var(--muted); border-radius: 6px; background: var(--paper);
                                color: var(--navy); font: inherit; cursor: pointer; }
+.planet-quiz button:disabled { background: #8a96b8; border-color: #8a96b8; cursor: default; }
+.planet-quiz button[aria-pressed="true"] { background: var(--paper); border: 3px solid #b3ceff; font-weight: 700; }
+.quiz-pick { margin-left: 6px; padding: 1px 6px; border-radius: 4px; background: var(--navy); color: var(--paper);
+             font-size: 0.8rem; font-weight: 600; }
 .planet-quiz :focus-visible { outline: 3px solid #b3ceff; outline-offset: 3px; }
 .quiz-answer { margin: 12px 0; padding: 12px 16px; background: var(--navy); border-radius: 8px; }
 .quiz-answer p { margin: 4px 0; }
