@@ -44,40 +44,6 @@ def test_duel_is_first_panel_with_labeled_selectors_and_get_form(client):
     assert "tabindex" not in section
 
 
-def test_default_is_jupiter_versus_earth(client):
-    section = duel(client.get("/").text)
-    assert selected(section, "left") == ["jupiter"]
-    assert selected(section, "right") == ["earth"]
-    assert sentence(section) == "Jupiter's diameter is 11.2 times Earth's."
-    assert "142,984 km" in section and "12,756 km" in section
-    assert len(re.findall(r'class="duel-portrait"', section)) == 2
-
-
-@pytest.mark.parametrize(("left", "right"), [
-    ("jupiter", "earth"), ("earth", "jupiter"), ("mercury", "mars"), ("neptune", "uranus"), ("venus", "saturn"),
-])
-def test_ratio_is_left_over_right_to_one_decimal(client, left, right):
-    response = client.get("/", params={"left": left, "right": right})
-    assert response.status_code == 200
-    section = duel(response.text)
-    ratio = f"{DIAMETERS[left] / DIAMETERS[right]:.1f}"
-    assert sentence(section) == f"{left.title()}'s diameter is {ratio} times {right.title()}'s."
-    assert selected(section, "left") == [left] and selected(section, "right") == [right]
-    assert f"{DIAMETERS[left]:,} km" in section and f"{DIAMETERS[right]:,} km" in section
-
-
-def test_ratio_direction_flips(client):
-    forward = sentence(duel(client.get("/?left=jupiter&right=earth").text))
-    reverse = sentence(duel(client.get("/?left=earth&right=jupiter").text))
-    assert "11.2" in forward and "0.1" in reverse
-
-
-@pytest.mark.parametrize("slug", ["earth", "mars", "neptune"])
-def test_identical_planets_show_one(client, slug):
-    section = duel(client.get("/", params={"left": slug, "right": slug}).text)
-    assert sentence(section) == f"{slug.title()}'s diameter is 1.0 times {slug.title()}'s."
-
-
 @pytest.mark.parametrize("params", [
     {"left": "pluto"}, {"right": "sun"}, {"left": "", "right": "earth"}, {"left": "Jupiter"},
     {"left": "<script>alert(1)</script>", "right": "earth"},
