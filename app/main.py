@@ -127,7 +127,7 @@ def home(request: Request, age: str | None = None, sort: str = "sun", left: str 
                     earth_age * ORBITAL_PERIOD_DAYS["Earth"] / ORBITAL_PERIOD_DAYS[name]
                 )
                 # Two decimals below one so tiny ages (Uranus 0.14, Neptune 0.07) stay apart.
-                digits = 2 if 0 < round(years, 2) < 1 else 1
+                digits = 2 if 0 < years < 1 else 1
                 birthdays.append({"name": name, "years": f"{years:.{digits}f}"})
     context.update(age=age if age is not None else "", age_error=age_error, birthdays=birthdays)
     context["duel"] = _duel(planets, left, right)

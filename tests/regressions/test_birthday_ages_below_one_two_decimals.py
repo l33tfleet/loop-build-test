@@ -22,7 +22,7 @@ def results(client, age):
 
 
 def expected(years):
-    return f"{years:.2f}" if 0 < round(years, 2) < 1 else f"{years:.1f}"
+    return f"{years:.2f}" if 0 < years < 1 else f"{years:.1f}"
 
 
 def test_age_twelve_keeps_uranus_and_neptune_apart(client):
@@ -38,7 +38,7 @@ def test_age_zero_still_reads_zero_point_zero_everywhere(client, age):
     assert results(client, age) == [(name, "0.0") for name in PERIODS]
 
 
-@pytest.mark.parametrize("age", [0.1, 0.5, 0.95, 0.999, 10, 12, 30, 30.26, 119.99, 120])
+@pytest.mark.parametrize("age", [0.001, 0.1, 0.5, 0.95, 0.999, 10, 12, 30, 30.26, 119.99, 120])
 def test_every_planet_uses_two_decimals_below_one_and_one_otherwise(client, age):
     assert results(client, age) == [
         (name, expected(age if name == "Earth" else age * PERIODS["Earth"] / period))
@@ -46,9 +46,19 @@ def test_every_planet_uses_two_decimals_below_one_and_one_otherwise(client, age)
     ]
 
 
-def test_value_rounding_up_to_one_reads_one_point_zero(client):
-    # Earth 0.999 rounds to 1.00 at two decimals, so it is shown as an age of one.
-    assert dict(results(client, 0.999))["Earth"] == "1.0"
+def test_ages_just_below_one_keep_two_decimals(client):
+    # The age itself is below one, so it keeps two decimals even when it rounds to 1.00.
+    assert dict(results(client, 0.999))["Earth"] == "1.00"
+    assert dict(results(client, 0.996))["Earth"] == "1.00"
+    assert dict(results(client, 1))["Earth"] == "1.0"
+
+
+def test_tiny_positive_ages_keep_two_decimals(client):
+    # Positive ages below 0.005 are still below one, so they read 0.00, not 0.0.
+    shown = dict(results(client, 0.001))
+    assert shown["Earth"] == "0.00"
+    assert shown["Neptune"] == "0.00"
+    assert shown["Mercury"] == "0.00"
 
 
 def test_formatting_follows_stored_orbital_periods(client, monkeypatch):
