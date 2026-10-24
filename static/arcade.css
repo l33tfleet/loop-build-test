@@ -14,3 +14,6 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 .planet-card .diameter { margin: 0; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
 .source { max-width: 960px; margin: 24px auto 0; color: var(--muted); font-size: 0.9rem; overflow-wrap: anywhere; }
 .source a { color: var(--paper); }
+
+/* Cards keep a readable width on large screens. */
+.shelf { max-width: 960px; }
