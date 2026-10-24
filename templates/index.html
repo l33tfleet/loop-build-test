@@ -147,7 +147,10 @@
       {% if age != "" %}<input type="hidden" name="age" value="{{ age }}">{% endif %}
       <button type="submit">Apply order</button>
     </form>
-    <section class="shelf" aria-label="Planet shelf">
+    <section class="planet-shelf" aria-labelledby="shelf-title">
+      <h2 id="shelf-title">The eight planets</h2>
+      <p class="shelf-note">{{ {"sun": "In order from the Sun", "diameter": "Largest diameter first", "year": "Shortest year first"}[sort] }}</p>
+      <div class="shelf">
       {% for p in planets %}
       <article class="planet-card" data-order="{{ p.order }}">
         <h2>{{ p.name }}</h2>
@@ -157,6 +160,7 @@
         <p class="earths">About {{ p.earths }} Earth{{ "" if p.earths == "1" else "s" }} wide</p>
       </article>
       {% endfor %}
+      </div>
     </section>
     <p class="source">Data: <a href="{{ source.url }}" rel="noopener">{{ source.name }}</a>, snapshot {{ source.retrieved }}.</p>
   </main>
