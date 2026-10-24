@@ -1,0 +1,36 @@
+    <section class="planet-quiz" aria-labelledby="quiz-title">
+      <h2 id="quiz-title">Planet diameter quiz</h2>
+      {% if quiz.error %}
+      <p role="alert">{{ quiz.error }}</p>
+      <a class="quiz-next" href="/?round=1">Start at round 1</a>
+      {% else %}
+      <p class="quiz-round">Round {{ quiz.number }} of 3</p>
+      <form action="/" method="get">
+        <input type="hidden" name="round" value="{{ quiz.number }}">
+        <fieldset>
+          <legend>Which planet has the larger diameter?</legend>
+          {% for p in quiz.sides %}
+          <button type="submit" name="choice" value="{{ p.name|lower }}">{{ p.name }}</button>
+          {% endfor %}
+        </fieldset>
+      </form>
+      <div class="quiz-scale">
+        {% for p in quiz.sides %}
+        <span class="quiz-side"><span class="quiz-frame" aria-hidden="true"><span class="quiz-planet" data-planet="{{ p.name|lower }}" style="width: {{ p.width_pct }}%"></span></span><span class="quiz-name">{{ p.name }}</span></span>
+        {% endfor %}
+      </div>
+      <p class="quiz-scale-note">Drawn to scale: each circle's width is the planet's diameter divided by the larger one's.</p>
+      {% if quiz.choice %}
+      <div class="quiz-answer" role="status">
+        <p><strong>{{ "Correct" if quiz.correct else "Try the next pair" }}</strong> — You chose {{ quiz.choice.name }}.</p>
+        <ul>
+          {% for p in quiz.sides %}
+          <li>{{ p.name }}: {{ "{:,}".format(p.diameter_km) }} km</li>
+          {% endfor %}
+        </ul>
+        <p>{{ quiz.winner.name }} has the larger diameter.</p>
+      </div>
+      <a class="quiz-next" href="/?round={{ quiz.next }}">Next</a>
+      {% endif %}
+      {% endif %}
+    </section>

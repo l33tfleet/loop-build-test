@@ -1,0 +1,25 @@
+    <section class="birthday-booth" aria-labelledby="birthday-title">
+      <h2 id="birthday-title">Planet birthdays</h2>
+      <p id="birthday-note">How many trips around the Sun? A toy year conversion, not a calendar-date calculation.</p>
+      <form action="/" method="get">
+        <input type="hidden" name="sort" value="{{ sort }}">
+        <label for="earth-age">Earth age (years)</label>
+        <div class="birthday-controls">
+          <input id="earth-age" name="age" type="number" min="0" max="120" step="any" required
+                 value="{{ age or "" }}" aria-describedby="birthday-note{% if age_error %} age-error{% endif %}"{% if age_error %} aria-invalid="true"{% endif %}>
+          <button type="submit">Find my planet ages</button>
+        </div>
+        <a class="birthday-try" href="/?age=10">or try age 10</a>
+      </form>
+      {% if age_error %}<p id="age-error" role="alert">{{ age_error }}</p>{% endif %}
+      {% if birthdays %}
+      <ul class="birthday-results" aria-label="Age in each planet's years">
+        {% for birthday in birthdays %}
+        <li class="birthday-result">
+          <span>{{ birthday.name }}</span>
+          <strong>{{ birthday.years }}</strong> <span>years</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </section>
