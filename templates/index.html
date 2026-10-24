@@ -12,6 +12,29 @@
     <p class="tagline">Compare the sizes of all eight planets on one scale, switch to a bar graph, then see the four rocky planets zoomed in.</p>
   </header>
   <main>
+    <section class="birthday-booth" aria-labelledby="birthday-title">
+      <h2 id="birthday-title">Planet birthdays</h2>
+      <p id="birthday-note">How many trips around the Sun? A toy year conversion, not a calendar-date calculation.</p>
+      <form action="/" method="get">
+        <label for="earth-age">Earth age (years)</label>
+        <div class="birthday-controls">
+          <input id="earth-age" name="age" type="number" min="0" max="120" step="any" required
+                 value="{{ age }}" aria-describedby="birthday-note{% if age_error %} age-error{% endif %}"{% if age_error %} aria-invalid="true"{% endif %}>
+          <button type="submit">Find my planet ages</button>
+        </div>
+      </form>
+      {% if age_error %}<p id="age-error" role="alert">{{ age_error }}</p>{% endif %}
+      {% if birthdays %}
+      <ul class="birthday-results" aria-label="Age in each planet's years">
+        {% for birthday in birthdays %}
+        <li class="birthday-result">
+          <span>{{ birthday.name }}</span>
+          <strong>{{ birthday.years }}</strong> <span>years</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </section>
     <section class="diameter-scale" aria-labelledby="scale-title">
       <h2 id="scale-title">Diameter scale</h2>
       <p class="scale-note" data-view="circles">Each circle's diameter is the planet's diameter divided by {{ largest.name }}'s {{ "{:,}".format(largest.diameter_km) }} km, on one linear scale. The circles overlap on a shared baseline so sizes compare directly.</p>

@@ -16,6 +16,21 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 .source { max-width: 960px; margin: 24px auto 0; color: var(--muted); font-size: 0.9rem; overflow-wrap: anywhere; }
 .source a { color: var(--paper); }
 
+.birthday-booth { margin-bottom: 24px; padding: 20px; border: 1px solid #536694; border-radius: 12px; background: #13204a; }
+.birthday-booth h2 { margin: 0; color: var(--paper); }
+.birthday-booth p { margin: 8px 0 16px; }
+.birthday-booth label { display: block; margin-bottom: 6px; font-weight: 600; }
+.birthday-controls { display: flex; flex-wrap: wrap; gap: 12px; }
+.birthday-controls input, .birthday-controls button { padding: 10px 12px; border: 1px solid #8e98b3; border-radius: 6px; font: inherit; }
+.birthday-controls input { width: 10rem; max-width: 100%; background: var(--navy); color: var(--paper); }
+.birthday-controls button { background: var(--paper); color: var(--navy); cursor: pointer; }
+.birthday-controls :focus-visible { outline: 3px solid #b3ceff; outline-offset: 3px; }
+.birthday-results { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: 12px; padding: 0; margin: 20px 0 0; list-style: none; }
+.birthday-result { padding: 12px; background: var(--navy); border-radius: 8px; }
+.birthday-result > span:first-child { display: block; color: var(--paper); }
+.birthday-result strong { font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+#age-error { color: #ffd3c6; }
+
 /* Cards keep a readable width on large screens. */
 .shelf { max-width: 960px; }
 /* Phones: two cards per row from ~376px up (390px gives 173px columns); 320px stays one column so text never wraps. */
