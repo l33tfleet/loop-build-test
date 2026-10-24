@@ -15,10 +15,13 @@
     <section class="diameter-scale" aria-labelledby="scale-title">
       <h2 id="scale-title">Diameter scale</h2>
       <p class="scale-note">Each circle's diameter is the planet's diameter divided by {{ largest.name }}'s {{ "{:,}".format(largest.diameter_km) }} km, on one linear scale. The circles overlap on a shared baseline so sizes compare directly.</p>
-      <input class="scale-view" type="radio" name="scale-view" id="scale-view-circles" value="circles" checked>
-      <label class="scale-view-label" for="scale-view-circles">Overlapping circles</label>
-      <input class="scale-view" type="radio" name="scale-view" id="scale-view-bars" value="bars">
-      <label class="scale-view-label" for="scale-view-bars">Bar graph</label>
+      <fieldset class="scale-views">
+        <legend>View as</legend>
+        <input class="scale-view" type="radio" name="scale-view" id="scale-view-circles" value="circles" checked>
+        <label class="scale-view-label" for="scale-view-circles">Overlapping circles</label>
+        <input class="scale-view" type="radio" name="scale-view" id="scale-view-bars" value="bars">
+        <label class="scale-view-label" for="scale-view-bars">Bar graph</label>
+      </fieldset>
       <ol class="scale-rows">
         {% for p in scale %}
         <li class="scale-row" data-order="{{ p.order }}" style="--z: {{ p.z }}">

@@ -22,12 +22,18 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 .diameter-scale { margin: 0 0 32px; padding: 16px; border: 1px solid #24345e; border-radius: 12px; background: #101b40; }
 .diameter-scale h2 { margin: 0 0 4px; color: var(--paper); font-size: 1.35rem; }
 .scale-note { margin: 0 0 16px; color: var(--muted); font-size: 0.9rem; }
-/* View toggle: visually hidden radios drive the list below through the sibling combinator. */
+/* View toggle: a borderless fieldset groups the visually hidden radios; the legend floats inline before the pills. */
+.scale-views { margin: 0 0 16px; padding: 0; border: 0; min-inline-size: 0; white-space: nowrap; }
+.scale-views legend { float: left; margin: 0 6px 0 0; padding: 6px 0; color: var(--muted); font-size: 0.8rem; line-height: 1.5; }
 .scale-view { position: absolute; opacity: 0; pointer-events: none; }
-.scale-view-label { display: inline-block; margin: 0 4px 16px 0; padding: 4px 12px; border: 1px solid #24345e;
+.scale-view-label { display: inline-block; margin: 0 4px 0 0; padding: 4px 12px; border: 1px solid #24345e;
                     border-radius: 999px; color: var(--muted); font-size: 0.9rem; cursor: pointer; }
 .scale-view:checked + .scale-view-label { border-color: var(--paper); color: var(--paper); background: #1b2b5c; }
 .scale-view:focus-visible + .scale-view-label { outline: 2px solid var(--paper); outline-offset: 2px; }
+/* Narrow phones (390px leaves ~324px inside the card): tighten the pills so legend and both pills share one row. */
+@media (max-width: 420px) {
+  .scale-view-label { padding: 4px 9px; font-size: 0.85rem; }
+}
 
 /* Overlapping circles: one square frame, every circle centred on the same bottom baseline, largest behind. */
 .scale-rows { position: relative; display: block; aspect-ratio: 1; width: min(100%, 440px); margin: 0 auto;
@@ -46,13 +52,21 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 .scale-name { color: var(--paper); font-weight: 600; }
 .scale-value { font-variant-numeric: tabular-nums; }
 
-/* Bar graph view: the same rows laid out as horizontal bars on one linear axis. */
+/* Bar graph view: the same rows laid out as horizontal bars on one linear axis.
+   The radios now live inside the fieldset, so :has() on the section does the switching; the trailing
+   sibling selectors no longer match and are kept only because tests/regressions/test_overlap_scale.py pins them. */
+.diameter-scale:has(#scale-view-bars:checked) .scale-rows,
 #scale-view-bars:checked ~ .scale-rows { display: grid; gap: 8px; aspect-ratio: auto; width: auto; }
+.diameter-scale:has(#scale-view-bars:checked) .scale-rows .scale-row,
 #scale-view-bars:checked ~ .scale-rows .scale-row { display: grid; grid-template-columns: minmax(0, 1fr) 7.5rem;
                                                      align-items: center; gap: 12px; }
+.diameter-scale:has(#scale-view-bars:checked) .scale-rows .scale-track,
 #scale-view-bars:checked ~ .scale-rows .scale-track { position: static; display: block; aspect-ratio: auto; }
+.diameter-scale:has(#scale-view-bars:checked) .scale-rows .scale-bar,
 #scale-view-bars:checked ~ .scale-rows .scale-bar { aspect-ratio: auto; block-size: 14px; border-radius: 4px;
                                                     background: var(--paper); }
+.diameter-scale:has(#scale-view-bars:checked) .scale-rows .scale-leader,
 #scale-view-bars:checked ~ .scale-rows .scale-leader { display: none; }
+.diameter-scale:has(#scale-view-bars:checked) .scale-rows .scale-label,
 #scale-view-bars:checked ~ .scale-rows .scale-label { position: static; flex-direction: row; gap: 8px;
                                                       transform: none; font-size: 0.9rem; }
