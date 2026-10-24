@@ -5,6 +5,9 @@ body { margin: 0; padding: 24px 16px; background: var(--navy); color: var(--ink)
 header, main { max-width: 960px; margin: 0 auto; }
 h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em; }
 .tagline { margin: 4px 0 24px; color: var(--muted); }
+.section-nav { max-width: 960px; margin: -16px auto 24px; }
+.section-nav ul { display: flex; flex-wrap: wrap; gap: 0 20px; margin: 0; padding: 0; list-style: none; }
+.section-nav a { display: inline-flex; align-items: center; min-height: 44px; color: var(--paper); }
 .empty { padding: 32px 16px; border: 1px dashed var(--muted); border-radius: 12px; text-align: center; color: var(--muted); }
 .shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 16px; }
 .planet-card { position: relative; padding: 16px; border: 1px solid #24345e; border-radius: 12px; background: #13204a; min-width: 0; }
