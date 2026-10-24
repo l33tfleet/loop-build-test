@@ -34,21 +34,27 @@ def problems(head, superseded=frozenset()):
     return checker.file_problems(PATH, BASE, head, set(superseded))
 
 
-def test_appending_tests_and_moving_code_pass():
-    moved = BASE.replace("LIMIT = 10\n", "") + "\nLIMIT = 10\n\n\ndef test_more():\n    assert helper(1) == 2\n"
-    assert problems(moved) == []
+REMOVED = BASE.replace("def test_large():\n    assert helper(3) == 6\n\n\n", "")
+NOT_REMOVED = f"{PATH}: changed beyond removing nothing (no Supersedes line)"
+ONLY_REMOVE = f"{PATH}: changed beyond removing `test_large` (only the superseded tests may be removed; put replacements in a new file)"
 
 
-def test_changing_a_test_without_supersedes_fails():
-    assert problems(REPLACED) == [f"{PATH}: changed or removed `test_large` (no Supersedes line)"]
+def test_unchanged_passes():
+    assert problems(BASE) == []
 
 
-def test_the_superseded_test_may_be_replaced():
-    assert problems(REPLACED, {"test_large"}) == []
+def test_removing_the_superseded_test_passes():
+    assert problems(REMOVED, {"test_large"}) == []
+
+
+@pytest.mark.parametrize("head", [REMOVED, REPLACED, BASE + "\n\ndef test_more():\n    assert True\n",
+                                  BASE.replace("LIMIT = 10\n", "") + "\nLIMIT = 10\n"])
+def test_any_change_without_supersedes_fails(head):
+    assert problems(head) == [NOT_REMOVED]
 
 
 def test_a_line_naming_another_test_fails():
-    assert problems(REPLACED, {"test_other"}) == [f"{PATH}: changed or removed `test_large`"]
+    assert problems(REMOVED, {"test_other"}) == [ONLY_REMOVE.replace("`test_large`", "`test_other`")]
 
 
 @pytest.mark.parametrize("name", ["helper", "LIMIT", "test_missing"])
@@ -56,25 +62,20 @@ def test_supersedes_only_covers_an_existing_top_level_test(name):
     assert f"{PATH}: Supersedes names `{name}`, which isn't a top-level test here" in problems(BASE, {name})
 
 
-def test_weakening_a_helper_fails_even_with_supersedes():
-    weak = REPLACED.replace("return v * 2", "return 6")
-    assert f"{PATH}: changed or removed `helper`" in problems(weak, {"test_large"})
-
-
 @pytest.mark.parametrize("added", [
+    "def test_true_scale():\n    assert helper(3) == 6\n",
     "def test_other():\n    assert True\n",
     "def helper(v):\n    return 6\n",
-    "LIMIT = 0\n",
-    "from os import path as helper\n",
-    "if True:\n    def test_other():\n        pass\n",
+    "del test_other\n",
+    "try:\n    raise ValueError\nexcept ValueError as test_other:\n    pass\n",
+    "X = globals().pop('test_other')\n",
 ])
-def test_added_code_may_not_shadow_kept_names(added):
-    assert any("rebinds" in p for p in problems(BASE + "\n\n" + added, {"test_large"}))
+def test_nothing_may_be_added_to_an_existing_file(added):
+    assert problems(REMOVED + "\n\n" + added, {"test_large"}) == [ONLY_REMOVE]
 
 
-def test_the_replacement_may_reuse_the_superseded_name():
-    same_name = BASE.replace("assert helper(3) == 6\n", "assert helper(3) == 6\n    assert helper(1) == 2\n")
-    assert problems(same_name, {"test_large"}) == []
+def test_weakening_a_helper_fails_even_with_supersedes():
+    assert problems(REMOVED.replace("return v * 2", "return 6"), {"test_large"}) == [ONLY_REMOVE]
 
 
 def test_unparseable_head_fails():
