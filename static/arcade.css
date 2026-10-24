@@ -31,17 +31,18 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 
 /* Overlapping circles: one square frame, every circle centred on the same bottom baseline, largest behind. */
 .scale-rows { position: relative; display: block; aspect-ratio: 1; width: min(100%, 440px); margin: 0 auto;
-              padding: 0; list-style: none; }
+              padding: 0; list-style: none; container-type: inline-size; }
 .scale-track { position: absolute; inset: 0; z-index: var(--z); display: flex; align-items: flex-end;
                justify-content: center; aspect-ratio: 1; pointer-events: none; }
 .scale-bar { display: block; aspect-ratio: 1; background: rgb(244 233 210 / 0.1); border: 1.5px solid var(--paper);
              border-radius: 50%; }
-.scale-leader { position: absolute; inset: 0; z-index: 20; overflow: visible; stroke: var(--muted); stroke-width: 1; }
+.scale-leader { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 20; overflow: visible; stroke: var(--muted); stroke-width: 1; }
 .scale-label { position: absolute; z-index: 30; display: flex; flex-direction: column; line-height: 1.2;
                font-size: 0.8rem; text-shadow: 0 0 3px var(--navy), 0 0 3px var(--navy); white-space: nowrap; }
 .scale-label--inside { left: 50%; top: calc(100% - var(--y) + 4%); transform: translateX(-50%); align-items: center; }
 .scale-label--above { left: 50%; bottom: calc(var(--y) + 1%); transform: translateX(-50%); align-items: center; }
-.scale-label--leader { left: 72%; bottom: var(--y); transform: translateY(50%); }
+/* Leader labels sit LEADER_STEP (13%) of the frame apart; capping the font at 5cqi keeps two lines (2.4em) under that gap. */
+.scale-label--leader { left: 72%; bottom: var(--y); transform: translateY(50%); font-size: min(0.8rem, 5cqi); }
 .scale-name { color: var(--paper); font-weight: 600; }
 .scale-value { font-variant-numeric: tabular-nums; }
 

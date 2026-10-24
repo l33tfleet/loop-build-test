@@ -16,7 +16,7 @@ FACTORS = {("km", "mi"): 0.621371, ("mi", "km"): 1.609344, ("kg", "lb"): 2.20462
 SNAPSHOT = json.loads((ROOT / "data" / "planets.json").read_text())
 LEADER_BELOW = 20  # circles under this % of the frame are too small to hold a label
 CROWDED = 12  # big circles whose tops are this close get labels on opposite sides of the rim
-LEADER_STEP = 11  # vertical spacing (% of frame) between leader-line labels
+LEADER_STEP = 13  # vertical spacing (% of frame) between leader-line labels; fits two text lines at 320px
 
 
 def _place_labels(scale):
@@ -30,7 +30,7 @@ def _place_labels(scale):
         p["label"], p["label_y"] = ("above" if crowded else "inside"), p["width_pct"]
     small = [p for p in reversed(by_size) if p["width_pct"] < LEADER_BELOW]
     for i, p in enumerate(small):
-        p["label"], p["label_y"] = "leader", 5 + LEADER_STEP * i
+        p["label"], p["label_y"] = "leader", 7 + LEADER_STEP * i
     return scale
 
 
