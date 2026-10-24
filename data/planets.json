@@ -1,0 +1,17 @@
+{
+  "source": {
+    "name": "NASA Planetary Fact Sheet (equatorial diameter)",
+    "url": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/",
+    "retrieved": "2026-10-24"
+  },
+  "planets": [
+    {"name": "Mercury", "order": 1, "diameter_km": 4879},
+    {"name": "Venus", "order": 2, "diameter_km": 12104},
+    {"name": "Earth", "order": 3, "diameter_km": 12756},
+    {"name": "Mars", "order": 4, "diameter_km": 6792},
+    {"name": "Jupiter", "order": 5, "diameter_km": 142984},
+    {"name": "Saturn", "order": 6, "diameter_km": 120536},
+    {"name": "Uranus", "order": 7, "diameter_km": 51118},
+    {"name": "Neptune", "order": 8, "diameter_km": 49528}
+  ]
+}

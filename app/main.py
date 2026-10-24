@@ -1,4 +1,5 @@
 """Solar Arcade: a toy planet playground for exercising an autonomous build loop end to end."""
+import json
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
@@ -12,11 +13,13 @@ app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
 templates = Jinja2Templates(directory=ROOT / "templates")
 
 FACTORS = {("km", "mi"): 0.621371, ("mi", "km"): 1.609344, ("kg", "lb"): 2.204623, ("lb", "kg"): 0.453592}
+SNAPSHOT = json.loads((ROOT / "data" / "planets.json").read_text())
 
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
-    return templates.TemplateResponse(request, "index.html", {})
+    planets = sorted(SNAPSHOT["planets"], key=lambda p: p["order"])
+    return templates.TemplateResponse(request, "index.html", {"planets": planets, "source": SNAPSHOT["source"]})
 
 
 @app.get("/healthz")

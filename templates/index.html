@@ -13,8 +13,16 @@
   </header>
   <main>
     <section class="shelf" aria-label="Planet shelf">
-      <p class="empty">The planet shelf is empty. The first planets arrive soon.</p>
+      {% for p in planets %}
+      <article class="planet-card" data-order="{{ p.order }}">
+        <span class="order">#{{ p.order }}</span>
+        <h2>{{ p.name }}</h2>
+        <p class="label">Diameter</p>
+        <p class="diameter">{{ "{:,}".format(p.diameter_km) }} km</p>
+      </article>
+      {% endfor %}
     </section>
+    <p class="source">Data: <a href="{{ source.url }}" rel="noopener">{{ source.name }}</a>, snapshot {{ source.retrieved }}.</p>
   </main>
 </body>
 </html>
