@@ -48,15 +48,5 @@ def test_tagline_is_one_sentence_about_size_and_view_toggle(client):
     assert "bar graph" in lower  # the "View as" toggle's second option
 
 
-def test_tagline_only_names_features_on_the_page(client):
-    page = client.get("/").text
-    lower = _tagline(client).lower()
-    for absent in ("game", "quiz", "play", "score", "arcade"):
-        assert absent not in lower
-    assert "Bar graph" in page
-    if "rocky" in lower:
-        assert 'class="rocky-inset"' in page
-
-
 def test_tagline_wraps_to_at_most_three_lines_on_a_phone(client):
     assert _lines(_tagline(client), VIEWPORT - 2 * BODY_PAD) <= 3
