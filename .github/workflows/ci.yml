@@ -1,0 +1,23 @@
+name: ci
+on: pull_request
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - run: make check
+
+  regressions-append-only:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Existing regression tests are never modified, renamed or deleted
+        run: |
+          base=$(git merge-base "origin/${{ github.base_ref }}" HEAD)
+          bad=$(git diff --name-only --diff-filter=MDR "$base" HEAD -- tests/regressions/)
+          if [ -n "$bad" ]; then echo "Append-only violation:"; echo "$bad"; exit 1; fi

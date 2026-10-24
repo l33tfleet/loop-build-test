@@ -1,0 +1,7 @@
+/tests/                 @jplexmurphy
+/tests/regressions/
+conftest.py             @jplexmurphy
+pyproject.toml          @jplexmurphy
+/.github/               @jplexmurphy
+/Makefile               @jplexmurphy
+/AGENTS.md              @jplexmurphy
