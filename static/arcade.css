@@ -131,3 +131,25 @@ main:has(#scale-view-bars:checked) .rocky-inset { display: none; }
 .inset-label--above { bottom: calc(var(--y) + 1%); }
 .inset-name { color: var(--paper); font-weight: 600; }
 .inset-value { font-variant-numeric: tabular-nums; }
+
+.planet-duel { margin-bottom: 24px; padding: 20px; border: 1px solid #536694; border-radius: 12px; background: #13204a; }
+.planet-duel h2 { margin: 0 0 12px; color: var(--paper); }
+.duel-form { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }
+.duel-field { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 4px; margin: 0; padding: 8px 12px 12px;
+              border: 1px solid #536694; border-radius: 8px; }
+.duel-field legend { padding: 0 4px; font-weight: 600; }
+.duel-field label { padding: 4px 10px 4px 2px; }
+.duel-field input:checked + label { color: var(--paper); font-weight: 600; }
+.duel-form button { max-width: 100%; padding: 10px 12px; border: 1px solid var(--muted); border-radius: 6px; font: inherit;
+                    background: var(--paper); color: var(--navy); cursor: pointer; }
+.duel-form :focus-visible { outline: 3px solid #b3ceff; outline-offset: 3px; }
+.duel-portraits { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0 0; }
+.duel-side { margin: 0; text-align: center; }
+.duel-frame { display: flex; align-items: center; justify-content: center; }
+.duel-portrait { display: block; width: min(100%, 240px); aspect-ratio: 1; border-radius: 50%;
+                 background: radial-gradient(circle at 35% 30%, var(--paper), #c98b4f 60%, #6b3f22); }
+.duel-side figcaption { margin-top: 8px; }
+.duel-side strong { display: block; color: var(--paper); font-size: 1.25rem; }
+.duel-ratio { margin: 16px 0 0; color: var(--paper); font-size: 1.5rem; text-align: center; }
+.duel-ratio strong { font-size: 2.25rem; font-variant-numeric: tabular-nums; }
+#duel-error { color: #ffd3c6; }
