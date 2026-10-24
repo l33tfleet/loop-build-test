@@ -153,3 +153,17 @@ main:has(#scale-view-bars:checked) .rocky-inset { display: none; }
 .duel-ratio { margin: 16px 0 0; color: var(--paper); font-size: 1.5rem; text-align: center; }
 .duel-ratio strong { font-size: 2.25rem; font-variant-numeric: tabular-nums; }
 #duel-error { color: #ffd3c6; }
+
+.planet-quiz { margin-bottom: 24px; padding: 20px; border: 1px solid #536694; border-radius: 12px; background: #13204a; }
+.planet-quiz h2 { margin: 0; color: var(--paper); }
+.quiz-round { margin: 8px 0; color: var(--muted); }
+.planet-quiz fieldset { min-inline-size: 0; margin: 0; padding: 0; border: 0; }
+.planet-quiz legend { padding: 0; margin-bottom: 12px; font-weight: 600; }
+.planet-quiz button, .quiz-next { display: inline-block; max-width: 100%; margin: 0 8px 8px 0; padding: 10px 16px;
+                               border: 1px solid var(--muted); border-radius: 6px; background: var(--paper);
+                               color: var(--navy); font: inherit; cursor: pointer; }
+.planet-quiz :focus-visible { outline: 3px solid #b3ceff; outline-offset: 3px; }
+.quiz-answer { margin: 12px 0; padding: 12px 16px; background: var(--navy); border-radius: 8px; }
+.quiz-answer p { margin: 4px 0; }
+.quiz-answer ul { padding-left: 20px; font-variant-numeric: tabular-nums; }
+.planet-quiz [role="alert"] { color: #ffd3c6; }

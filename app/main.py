@@ -3,7 +3,7 @@ import json
 import math
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -24,6 +24,7 @@ LEADER_BELOW = 20  # circles under this % of the frame are too small to hold a l
 CROWDED = 12  # big circles whose tops are this close get labels on opposite sides of the rim
 ROCKY = ("Mercury", "Venus", "Earth", "Mars")  # zoomed inset, scaled to Earth instead of the largest planet
 LEADER_STEP = 13  # vertical spacing (% of frame) between leader-line labels; fits two text lines at 320px
+QUIZ_PAIRS = (("jupiter", "earth"), ("mercury", "mars"), ("neptune", "uranus"))
 
 
 def _ordinal(n):
@@ -63,8 +64,24 @@ def _duel(planets, left, right):
     return {"left": left, "right": right, "sides": [a, b], "ratio": f"{a['diameter_km'] / b['diameter_km']:.1f}"}
 
 
+def _quiz(planets, round_number, choice):
+    """All quiz state comes from the URL and the fixed planet snapshot."""
+    if round_number not in ("1", "2", "3"):
+        return {"error": "Choose a round from 1 through 3."}
+    number = int(round_number)
+    pair = QUIZ_PAIRS[number - 1]
+    if choice is not None and choice not in pair:
+        return {"error": "Choose one of the two planets in this round."}
+    by_slug = {p["name"].lower(): p for p in planets}
+    sides = [by_slug[slug] for slug in pair]
+    winner = max(sides, key=lambda p: p["diameter_km"])
+    return {"number": number, "sides": sides, "choice": by_slug[choice] if choice else None,
+            "winner": winner, "correct": choice == winner["name"].lower(), "next": number % 3 + 1}
+
+
 @app.get("/", response_class=HTMLResponse)
-def home(request: Request, age: str | None = None, sort: str = "sun", left: str = "jupiter", right: str = "earth"):
+def home(request: Request, age: str | None = None, sort: str = "sun", left: str = "jupiter", right: str = "earth",
+         round_number: str = Query("1", alias="round"), choice: str | None = None):
     sort_keys = {
         "sun": lambda p: (p["order"], p["name"].lower()),
         "diameter": lambda p: (-p["diameter_km"], p["name"].lower()),
@@ -107,7 +124,8 @@ def home(request: Request, age: str | None = None, sort: str = "sun", left: str 
                 birthdays.append({"name": name, "years": f"{years:.1f}"})
     context.update(age=age if age is not None else "", age_error=age_error, birthdays=birthdays)
     context["duel"] = _duel(planets, left, right)
-    status = 422 if "error" in context["duel"] else 200
+    context["quiz"] = _quiz(planets, round_number, choice)
+    status = 422 if "error" in context["duel"] or "error" in context["quiz"] else 200
     return templates.TemplateResponse(request, "index.html", context, status_code=status)
 
 
