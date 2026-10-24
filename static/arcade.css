@@ -138,7 +138,10 @@ main:has(#scale-view-bars:checked) .rocky-inset { display: none; }
 .duel-field { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 4px; margin: 0; padding: 8px 12px 12px;
               border: 1px solid #536694; border-radius: 8px; }
 .duel-field legend { padding: 0 4px; font-weight: 600; }
-.duel-radio-pair { display: inline-flex; align-items: center; white-space: nowrap; }
+/* One outlined pill per radio and name, so the pair reads (and wraps) as a single button. */
+.duel-radio-pair { display: inline-flex; align-items: center; white-space: nowrap; padding-left: 8px;
+                   border: 1px solid #536694; border-radius: 999px; background: #1a2a5c; }
+.duel-radio-pair:has(input:checked) { border-color: var(--paper); }
 .duel-field label { padding: 4px 10px 4px 2px; }
 .duel-field input:checked + label { color: var(--paper); font-weight: 600; }
 .duel-form button { max-width: 100%; padding: 10px 12px; border: 1px solid var(--muted); border-radius: 6px; font: inherit;
