@@ -1,6 +1,7 @@
 """#88: URL-carried quiz scores give each three-round game an ending."""
 import re
 from html import unescape
+from urllib.parse import parse_qs, urlsplit  # noqa: F401 -- preserved under the append-only supersession policy
 
 import pytest
 
