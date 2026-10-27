@@ -1,5 +1,6 @@
 """Planet diameter quiz: three rounds, each picking the larger of two planets."""
 # ruff: noqa: N999 -- the NN_ prefix is the section's place on the page, by convention
+from app.scale_labels import to_scale
 
 QUIZ_PAIRS = (("jupiter", "earth"), ("mercury", "mars"), ("neptune", "uranus"))
 
@@ -14,9 +15,7 @@ def _quiz(planets, round_number, choice):
         return {"error": "Choose one of the two planets in this round."}
     by_slug = {p["name"].lower(): p for p in planets}
     winner = max((by_slug[slug] for slug in pair), key=lambda p: p["diameter_km"])
-    # Linear, no floor: each circle's diameter is diameter / the larger one's, so Jupiter is ~11 Earths wide.
-    sides = [{**by_slug[slug], "width_pct": round(100 * by_slug[slug]["diameter_km"] / winner["diameter_km"], 4)}
-             for slug in pair]
+    sides = to_scale((by_slug[slug] for slug in pair), winner["diameter_km"])
     return {"number": number, "sides": sides, "choice": by_slug[choice] if choice else None,
             "winner": winner, "correct": choice == winner["name"].lower(), "next": number % 3 + 1}
 
