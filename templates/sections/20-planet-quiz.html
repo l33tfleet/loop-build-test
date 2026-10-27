@@ -8,6 +8,9 @@
       <form action="/" method="get">
         <input type="hidden" name="round" value="{{ quiz.number }}">
         <input type="hidden" name="score" value="{{ quiz.score }}">
+        {% if quiz.set_id is not none %}
+        <input type="hidden" name="set" value="{{ quiz.set_id }}">
+        {% endif %}
         <fieldset>
           <legend>Which planet has the larger diameter?</legend>
           {% for p in quiz.sides %}
@@ -44,9 +47,9 @@
         {% endif %}
       </div>
       {% if quiz.complete %}
-      <a class="quiz-next" href="/?round=1">Play again</a>
+      <a class="quiz-next" href="{{ quiz.replay_url }}">Play again</a>
       {% else %}
-      <a class="quiz-next" href="/?round={{ quiz.next }}&amp;score={{ quiz.resulting_score }}">Next</a>
+      <a class="quiz-next" href="{{ quiz.next_url }}">Next</a>
       {% endif %}
       {% endif %}
       {% endif %}
