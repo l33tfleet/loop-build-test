@@ -219,3 +219,23 @@ def test_card_heading_css_no_longer_targets_h2(client):
         assert _decl(css, viewport, ".planet-card h3", "font-size") == size
         assert _decl(css, viewport, ".planet-card h3", "margin") == "0 0 2px"
         assert _decl(css, viewport, ".planet-card h3", "color") == "var(--paper)"
+
+
+def test_added_registry_sort_preserves_order_options_and_h3_outline(client, monkeypatch):
+    from test_sorts_registry_91 import _assert_sort, shelf
+
+    entry = {
+        "label": "Longest year first",
+        "note": "From the longest orbit to the shortest",
+        "key": lambda planet, state: (-state["periods"][planet["name"]], planet["name"].lower()),
+    }
+    monkeypatch.setitem(shelf.SORTS, "longest-year", entry)
+    html = _assert_sort(client, "longest-year", entry)
+    assert shelf_names(html) == [
+        "Neptune", "Uranus", "Saturn", "Jupiter", "Mars", "Earth", "Venus", "Mercury",
+    ]
+    options = re.findall(r'<option value="([^"]+)"(?: selected)?>', html)
+    assert options == list(shelf.SORTS)
+    body = re.search(r'<section class="planet-shelf"[^>]*>(.*?)</section>', html, re.DOTALL).group(1)
+    assert re.findall(r'<h2\b[^>]*>(.*?)</h2>', body) == ["The eight planets"]
+    assert all(not re.search(r'<h2\b', card) for card in CARD.findall(body))
