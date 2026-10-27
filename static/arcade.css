@@ -1,4 +1,4 @@
-:root { --navy: #0b1530; --paper: #f4e9d2; --ink: #d9deea; --muted: #8e98b3; }
+:root { --navy: #0b1530; --paper: #f4e9d2; --ink: #d9deea; --muted: #a9b2cb; }
 * { box-sizing: border-box; }
 body { margin: 0; padding: 24px 16px; background: var(--navy); color: var(--ink);
        font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
@@ -12,8 +12,8 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 .shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 16px; }
 .planet-card { position: relative; padding: 16px; border: 1px solid #24345e; border-radius: 12px; background: #13204a; min-width: 0; }
 .planet-card h2 { margin: 0 0 2px; color: var(--paper); font-size: 1.35rem; }
-.planet-card .order { margin: 0 0 8px; color: var(--muted); font-size: 0.85rem; }
-.planet-card .label { margin: 0; color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.planet-card .order { margin: 0 0 8px; color: var(--muted); font-size: 0.875rem; }
+.planet-card .label { margin: 0; color: var(--muted); font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.06em; }
 .planet-card .diameter { margin: 0; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
 .planet-card .earths { margin: 4px 0 0; color: var(--muted); font-size: 0.9rem; }
 .source { max-width: 960px; margin: 24px auto 0; color: var(--muted); font-size: 0.9rem; overflow-wrap: anywhere; }
@@ -49,13 +49,14 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 .shelf-note { margin: 0 0 16px; color: var(--muted); font-size: 0.9rem; }
 /* Cards keep a readable width on large screens. */
 .shelf { max-width: 960px; }
-/* Phones: two cards per row from ~376px up (390px gives 173px columns); 320px stays one column so text never wraps. */
+/* Phones: two cards per row from ~370px up (390px gives 175px columns); 320px stays one column so text never wraps.
+   The 8px gap and padding leave room for the 14px earths caption on one line. */
 @media (max-width: 420px) {
-  .shelf { grid-template-columns: repeat(auto-fill, minmax(min(100%, 165px), 1fr)); gap: 12px; }
-  .planet-card { padding: 12px; }
+  .shelf { grid-template-columns: repeat(auto-fill, minmax(min(100%, 165px), 1fr)); gap: 8px; }
+  .planet-card { padding: 8px; }
   .planet-card h2 { font-size: 1.2rem; }
   .planet-card .diameter { font-size: 1.05rem; }
-  .planet-card .earths { font-size: 0.8rem; }
+  .planet-card .earths { font-size: 0.875rem; }
 }
 
 /* Diameter scale: one linear axis, circle diameter = diameter / largest diameter of a shared square track. */
@@ -91,12 +92,12 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
              background: var(--planet-surface); }
 .scale-leader { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 20; overflow: visible; stroke: var(--muted); stroke-width: 1; }
 .scale-label { position: absolute; z-index: 30; display: flex; flex-direction: column; line-height: 1.2;
-               font-size: 0.8rem; text-shadow: 0 0 3px var(--navy), 0 0 3px var(--navy); white-space: nowrap;
+               font-size: 0.875rem; text-shadow: 0 0 3px var(--navy), 0 0 3px var(--navy); white-space: nowrap;
                padding: 0 4px; border-radius: 4px; background: var(--navy); }
 .scale-label--inside { left: 50%; top: calc(100% - var(--y) + 4%); transform: translateX(-50%); align-items: center; }
 .scale-label--above { left: 50%; bottom: calc(var(--y) + 1%); transform: translateX(-50%); align-items: center; }
-/* Leader labels sit LEADER_STEP (13%) of the frame apart; capping the font at 5cqi keeps two lines (2.4em) under that gap. */
-.scale-label--leader { left: 72%; bottom: var(--y); transform: translateY(50%); font-size: min(0.8rem, 5cqi); }
+/* Leader labels sit LEADER_STEP (13%) of the frame apart; capping the 14px font at 5cqi keeps two lines (2.4em) under that gap on narrow frames. */
+.scale-label--leader { left: 72%; bottom: var(--y); transform: translateY(50%); font-size: min(0.875rem, 5cqi); }
 .scale-name { color: var(--paper); font-weight: 600; }
 .scale-value { font-variant-numeric: tabular-nums; }
 
@@ -136,7 +137,7 @@ main:has(#scale-view-bars:checked) .rocky-inset { display: none; }
 .inset-circle { display: block; aspect-ratio: 1; border: 1.5px solid var(--navy); border-radius: 50%;
                 background: var(--planet-surface); }
 .inset-label { position: absolute; z-index: 30; left: 50%; transform: translateX(-50%); display: flex;
-               flex-direction: column; align-items: center; line-height: 1.2; font-size: 0.8rem;
+               flex-direction: column; align-items: center; line-height: 1.2; font-size: 0.875rem;
                text-shadow: 0 0 3px var(--navy), 0 0 3px var(--navy); white-space: nowrap;
                padding: 0 4px; border-radius: 4px; background: var(--navy); }
 .inset-label--inside { top: calc(100% - var(--y) + 4%); }
@@ -183,10 +184,10 @@ main:has(#scale-view-bars:checked) .rocky-inset { display: none; }
 .planet-quiz button:disabled { background: #8a96b8; border-color: #8a96b8; cursor: default; }
 .planet-quiz button[aria-pressed="true"] { background: var(--paper); border: 3px solid #b3ceff; font-weight: 700; }
 .quiz-pick { margin-left: 6px; padding: 1px 6px; border-radius: 4px; background: var(--navy); color: var(--paper);
-             font-size: 0.8rem; font-weight: 600; }
+             font-size: 0.875rem; font-weight: 600; }
 /* Winner badge: navy text straight on the button fill (#8a96b8 disabled ≈ 6.1:1, paper ≈ 15:1), outlined so it reads without hue. */
 .quiz-larger { margin-left: 6px; padding: 0 6px; border: 2px solid var(--navy); border-radius: 4px; background: transparent;
-               color: var(--navy); font-size: 0.8rem; font-weight: 700; }
+               color: var(--navy); font-size: 0.875rem; font-weight: 700; }
 .planet-quiz :focus-visible { outline: 3px solid #b3ceff; outline-offset: 3px; }
 .quiz-answer { margin: 12px 0; padding: 12px 16px; background: var(--navy); border-radius: 8px; }
 .quiz-answer p { margin: 4px 0; }

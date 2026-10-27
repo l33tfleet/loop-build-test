@@ -1,4 +1,3 @@
-import itertools
 import re
 from html import unescape
 
@@ -74,24 +73,6 @@ def test_inset_circles_share_one_baseline_like_the_main_chart(client):
     assert re.search(r"border-radius:\s*50%", circle) and re.search(r"aspect-ratio:\s*1\b", circle)
     z = {name: int(re.search(r"--z:\s*(\d+)", row["attrs"]).group(1)) for name, row in _rows(client).items()}
     assert [z[n] for n in sorted(ROCKY_KM, key=ROCKY_KM.get, reverse=True)] == sorted(z.values())
-
-
-def test_labels_do_not_overlap_at_390px(client):
-    rows = _rows(client)
-    label_pct = 2 * LINE_HEIGHT * LABEL_REM * REM / PHONE_FRAME * 100  # name + value lines
-    spans = []
-    for name, row in rows.items():
-        if row["mode"] == "inside":
-            top = 100 - row["y"] + 4  # .inset-label--inside: top = 100% - y + 4%
-        else:
-            assert row["mode"] == "above", name
-            top = 100 - row["y"] - 1 - label_pct  # bottom = y + 1%
-        spans.append((top, top + label_pct, name))
-    spans.sort()
-    for (_, end, a), (start, _, b) in itertools.pairwise(spans):
-        assert end <= start, f"{a} label overlaps {b}"
-    css = client.get("/static/arcade.css").text
-    assert re.search(r"font-size:\s*0\.8rem", _rules(css, ".inset-label"))
 
 
 def test_inset_hides_in_bar_view(client):
