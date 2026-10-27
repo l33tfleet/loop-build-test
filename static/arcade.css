@@ -183,6 +183,9 @@ main:has(#scale-view-bars:checked) .rocky-inset { display: none; }
 .planet-quiz button[aria-pressed="true"] { background: var(--paper); border: 3px solid #b3ceff; font-weight: 700; }
 .quiz-pick { margin-left: 6px; padding: 1px 6px; border-radius: 4px; background: var(--navy); color: var(--paper);
              font-size: 0.8rem; font-weight: 600; }
+/* Winner badge: navy text straight on the button fill (#8a96b8 disabled ≈ 6.1:1, paper ≈ 15:1), outlined so it reads without hue. */
+.quiz-larger { margin-left: 6px; padding: 0 6px; border: 2px solid var(--navy); border-radius: 4px; background: transparent;
+               color: var(--navy); font-size: 0.8rem; font-weight: 700; }
 .planet-quiz :focus-visible { outline: 3px solid #b3ceff; outline-offset: 3px; }
 .quiz-answer { margin: 12px 0; padding: 12px 16px; background: var(--navy); border-radius: 8px; }
 .quiz-answer p { margin: 4px 0; }
