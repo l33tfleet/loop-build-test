@@ -184,7 +184,8 @@ main:has(#scale-view-bars:checked) .rocky-inset { display: none; }
 .planet-quiz button:disabled { background: #8a96b8; border-color: #8a96b8; cursor: default; }
 /* The winning button stays on paper with navy text (≈15:1) so the answer reads; only the other button dims. */
 .planet-quiz button.quiz-winner { background: var(--paper); border: 2px solid var(--navy); color: var(--navy); }
-.planet-quiz button[aria-pressed="true"] { background: var(--paper); border: 3px solid #b3ceff; font-weight: 700; }
+/* The pick is marked by border and weight only, so a wrong pick keeps the dimmed fill. */
+.planet-quiz button[aria-pressed="true"] { border: 3px solid #b3ceff; font-weight: 700; }
 .quiz-pick { margin-left: 6px; padding: 1px 6px; border-radius: 4px; background: var(--navy); color: var(--paper);
              font-size: 0.875rem; font-weight: 600; }
 /* Winner badge: navy text straight on the button fill (#8a96b8 disabled ≈ 6.1:1, paper ≈ 15:1), outlined so it reads without hue. */

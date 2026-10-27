@@ -87,3 +87,26 @@ def test_winner_rule_overrides_the_dimmed_disabled_fill():
     for selector, later in rules[selectors.index(WINNER_SELECTOR) + 1:]:
         if "button" in selector and "planet-quiz" in selector:
             assert "#8a96b8" not in later.lower(), selector
+
+
+def _matches_picked_loser(selector):
+    # A wrong pick is a disabled, aria-pressed="true" quiz button without .quiz-winner.
+    if not selector.startswith(".planet-quiz button") or "quiz-winner" in selector:
+        return False
+    rest = selector[len(".planet-quiz button"):]
+    return re.fullmatch(r'(:disabled|\[aria-pressed="true"\])*', rest) is not None
+
+
+@pytest.mark.parametrize("url,loser", [
+    ("/?round=1&score=0&choice=earth", "earth"),
+    ("/?round=2&choice=mercury", "mercury"),
+])
+def test_picked_non_winner_keeps_the_dimmed_fill(client, url, loser):
+    attrs, _ = buttons(client.get(url))[loser]
+    assert "quiz-winner" not in classes(attrs) and 'aria-pressed="true"' in attrs
+    css = CSS.read_text()
+    matching = [body for s, body in _rules(css)
+                for sel in s.split(",") if _matches_picked_loser(sel.strip())]
+    # Matching rules all tie on specificity (or lose to it), so the last background declared wins.
+    backgrounds = [m.group(1) for body in matching for m in re.finditer(r"background:\s*([^;]+);", body)]
+    assert backgrounds and _resolve(css, backgrounds[-1]) == "#8a96b8"
