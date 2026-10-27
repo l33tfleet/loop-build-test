@@ -116,3 +116,11 @@ def test_each_answer_reveals_values_and_advances_or_restarts(
     assert f"Round {number % 3 + 1} of 3" in next_panel
     assert "Correct" not in next_panel and "Not quite" not in next_panel
     assert all("disabled" not in attrs for attrs in re.findall(r'<button\b([^>]*)>', next_panel))
+
+
+@pytest.mark.parametrize("score", ["oops", "-1", "4"])
+def test_normalized_score_carries_through_next(client, score):
+    panel = quiz(client.get("/", params={"round": "1", "choice": "jupiter", "score": score}))
+    assert form(panel)[1]["score"] == "0"
+    following = quiz(client.get(next_link(panel)))
+    assert form(following)[1] == {"round": "2", "score": "1"}
