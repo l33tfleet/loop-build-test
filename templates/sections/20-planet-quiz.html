@@ -4,7 +4,7 @@
       <p role="alert">{{ quiz.error }}</p>
       <a class="quiz-next" href="/?round=1">Start at round 1</a>
       {% else %}
-      <p class="quiz-round">Round {{ quiz.number }} of 3</p>
+      <p class="quiz-round">Round {{ quiz.number }} of {{ quiz.rounds }}</p>
       <form action="/" method="get">
         <input type="hidden" name="round" value="{{ quiz.number }}">
         <input type="hidden" name="score" value="{{ quiz.score }}">
@@ -40,7 +40,7 @@
         </ul>
         <p>{{ quiz.winner.name }} has the larger diameter.</p>
         {% if quiz.complete %}
-        <p>You got {{ quiz.resulting_score }} of 3!</p>
+        <p>You got {{ quiz.resulting_score }} of {{ quiz.rounds }}!</p>
         {% endif %}
       </div>
       {% if quiz.complete %}
