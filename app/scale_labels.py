@@ -5,6 +5,14 @@ CROWDED = 12  # big circles whose tops are this close get labels on opposite sid
 LEADER_STEP = 13  # vertical spacing (% of frame) between leader-line labels; fits two text lines at 320px
 
 
+def to_scale(planets, reference_km):
+    """Return ordered shallow copies with linear widths and no floor.
+
+    width_pct = round(100 * diameter_km / reference_km, 4), rounded to four decimals.
+    """
+    return [{**p, "width_pct": round(100 * p["diameter_km"] / reference_km, 4)} for p in planets]
+
+
 def place_labels(scale):
     """Label the overlapping circles: big ones on their rim, small ones on leader lines."""
     by_size = sorted(scale, key=lambda p: p["width_pct"], reverse=True)
