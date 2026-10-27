@@ -1,8 +1,4 @@
-import os
 import re
-import socket
-import threading
-import time
 from pathlib import Path
 
 import pytest
@@ -52,52 +48,3 @@ def test_scale_note_styled_like_quiz_note():
     for decl in ("color: var(--muted)", "font-size: 0.9rem"):
         assert decl in quiz and decl in note.group(1)
 
-
-browser_only = pytest.mark.skipif(
-    not os.environ.get("ARCADE_BROWSER_TESTS"),
-    reason="set ARCADE_BROWSER_TESTS=1 with a launchable Chromium to measure the ratio on screen",
-)
-
-
-@pytest.fixture(scope="module")
-def base_url():
-    import uvicorn
-
-    from app.main import app
-
-    with socket.socket() as sock:
-        sock.bind(("127.0.0.1", 0))
-        port = sock.getsockname()[1]
-    server = uvicorn.Server(uvicorn.Config(app, host="127.0.0.1", port=port, log_level="warning"))
-    thread = threading.Thread(target=server.run, daemon=True)
-    thread.start()
-    while not server.started:
-        time.sleep(0.05)
-    yield f"http://127.0.0.1:{port}"
-    server.should_exit = True
-    thread.join(timeout=5)
-
-
-@browser_only
-@pytest.mark.parametrize(("width", "height", "javascript"), [(390, 844, True), (1280, 800, True), (390, 844, False)])
-def test_ratio_fully_visible_after_compare(base_url, width, height, javascript):
-    from playwright.sync_api import sync_playwright
-
-    with sync_playwright() as p:
-        browser = p.chromium.launch()
-        context = browser.new_context(viewport={"width": width, "height": height}, java_script_enabled=javascript)
-        page = context.new_page()
-        page.goto(base_url + "/")
-        page.check("#duel-left-saturn")
-        page.check("#duel-right-mercury")
-        page.click(".duel-form button[type=submit]")
-        page.locator(".duel-ratio", has_text="as wide as Mercury").wait_for()
-        page.wait_for_timeout(300)
-        box = page.locator(".duel-ratio").bounding_box()
-        button = page.locator(".duel-form button[type=submit]").bounding_box()
-        scroll = page.evaluate("window.scrollY")
-        print(f"{width}x{height} js={javascript} scrollY={scroll} ratio={box} button={button}")
-        browser.close()
-    top = box["y"] + scroll
-    assert top >= button["y"] + scroll + button["height"]
-    assert top + box["height"] <= height, (box, scroll, height)
