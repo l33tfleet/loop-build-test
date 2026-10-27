@@ -168,3 +168,24 @@ def test_selected_set_length_controls_bounds_and_score(client, monkeypatch):
     response = client.get("/?round=2&set=1")
     assert response.status_code == 422
     assert "Choose a round from 1 through 1." in response.text
+
+
+@pytest.mark.parametrize("set_number", [0, 1, 2])
+def test_replay_opening_pair_is_absent_from_entire_previous_game(client, set_number):
+    panel = quiz(client.get("/", params={"round": "1", "set": str(set_number)}))
+    played_pairs = set()
+    while True:
+        pair = choices(panel)
+        played_pairs.add(frozenset(pair))
+        action, fields = form(panel)
+        answered = quiz(client.get(action, params={**fields, "choice": pair[0]}))
+        if "Play again" in answered:
+            replay_url = next_link(answered, "Play again")
+            break
+        panel = quiz(client.get(next_link(answered)))
+
+    replay = quiz(client.get(replay_url))
+    assert form(replay)[1] == {
+        "round": "1", "score": "0", "set": str((set_number + 1) % 3),
+    }
+    assert frozenset(choices(replay)) not in played_pairs

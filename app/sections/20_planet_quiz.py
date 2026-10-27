@@ -6,7 +6,7 @@ QUIZ_PAIRS = (("jupiter", "earth"), ("mercury", "mars"), ("neptune", "uranus"))
 QUIZ_SETS = (
     QUIZ_PAIRS,
     (("saturn", "neptune"), ("venus", "mercury"), ("earth", "mars")),
-    (("uranus", "saturn"), ("mars", "venus"), ("earth", "jupiter")),
+    (("uranus", "saturn"), ("mars", "venus"), ("venus", "earth")),
 )
 
 
