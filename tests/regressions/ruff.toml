@@ -1,9 +1,8 @@
-# Superseded tests were removed from these append-only files, leaving an import unused;
-# the files themselves may not be edited further, so the unused import is allowed here instead.
+# Superseded tests were removed from this append-only file, leaving its pytest import unused;
+# the file itself may not be edited further, so the unused import is allowed here instead.
 extend = "../../pyproject.toml"
 # Keep `app` first-party, as it is under the root config.
 src = ["../.."]
 
 [lint.per-file-ignores]
 "test_quiz_true_diameter_circles.py" = ["F401"]
-"test_rocky_inset.py" = ["F401"]
