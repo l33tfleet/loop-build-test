@@ -181,3 +181,14 @@ def test_card_heading_preserves_size_color_and_spacing(client, viewport, size):
     assert _decl(css, viewport, ".planet-card h3", "font-size") == size
     assert _decl(css, viewport, ".planet-card h3", "color") == "var(--paper)"
     assert _decl(css, viewport, ".planet-card h3", "margin") == "0 0 2px"
+
+
+@pytest.mark.parametrize("sort", ["sun", "diameter", "year"])
+def test_heading_outline_survives_shelf_sort(client, sort):
+    html = client.get("/", params={"sort": sort}).text
+    body = re.search(r'<section class="planet-shelf"[^>]*>(.*?)</section>', html, re.DOTALL).group(1)
+    headings = re.findall(r'<h([23])\b[^>]*>(.*?)</h\1>', body)
+    assert headings[0] == ("2", "The eight planets")
+    assert len(headings) == 9
+    assert all(level == "3" for level, _ in headings[1:])
+    assert {name for _, name in headings[1:]} == set(SUN_ORDER)
