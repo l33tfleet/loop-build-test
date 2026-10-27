@@ -182,6 +182,8 @@ main:has(#scale-view-bars:checked) .rocky-inset { display: none; }
                                border: 1px solid var(--muted); border-radius: 6px; background: var(--paper);
                                color: var(--navy); font: inherit; cursor: pointer; }
 .planet-quiz button:disabled { background: #8a96b8; border-color: #8a96b8; cursor: default; }
+/* The winning button stays on paper with navy text (≈15:1) so the answer reads; only the other button dims. */
+.planet-quiz button.quiz-winner { background: var(--paper); border: 2px solid var(--navy); color: var(--navy); }
 .planet-quiz button[aria-pressed="true"] { background: var(--paper); border: 3px solid #b3ceff; font-weight: 700; }
 .quiz-pick { margin-left: 6px; padding: 1px 6px; border-radius: 4px; background: var(--navy); color: var(--paper);
              font-size: 0.875rem; font-weight: 600; }
