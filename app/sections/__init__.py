@@ -3,6 +3,7 @@
 Each `NN_name.py` module here exposes `context(state) -> dict` and renders with
 `templates/sections/NN-name.html`; sections appear on the page in filename order.
 A context may set `status_code` to ask for a non-200 response. Sections never import each other.
+A new section also needs a nav link and a tagline mention in `templates/index.html`.
 """
 import importlib
 import pkgutil
