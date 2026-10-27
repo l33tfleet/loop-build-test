@@ -1,6 +1,8 @@
 """#68: once a round is answered the two answer buttons lock, the pick is marked, and a miss reads "Not quite"."""
 import re
 
+import pytest  # noqa: F401 -- preserved under the append-only supersession policy
+
 PAIRS = [
     (1, "jupiter", 142984, "earth", 12756, "jupiter"),
     (2, "mercury", 4879, "mars", 6792, "mars"),
