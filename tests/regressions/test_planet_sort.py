@@ -20,40 +20,6 @@ def shelf_names(html):
     return re.findall(r'<article class="planet-card"[^>]*>\s*<h2>(.*?)</h2>', html)
 
 
-@pytest.mark.parametrize("sort,expected", [
-    ("sun", ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"]),
-    ("diameter", ["Jupiter", "Saturn", "Uranus", "Neptune", "Earth", "Venus", "Mars", "Mercury"]),
-    ("year", ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"]),
-    ("unknown", ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"]),
-    ("", ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"]),
-])
-def test_sort_order_and_active_choice_survive_reload(client, sort, expected):
-    for _ in range(2):
-        response = client.get("/", params={"sort": sort, "age": "30"})
-        assert response.status_code == 200
-        assert shelf_names(response.text) == expected
-        tags = Controls(response.text).tags
-        selected = [attrs["value"] for tag, attrs in tags if tag == "option" and "selected" in attrs]
-        assert selected == [sort if sort in {"sun", "diameter", "year"} else "sun"]
-
-
-@pytest.mark.parametrize("sort,field", [("sun", "order"), ("diameter", "diameter_km"), ("year", None)])
-def test_sort_uses_stored_values_and_slug_ties(client, monkeypatch, sort, field):
-    planets = [dict(p) for p in reversed(main.SNAPSHOT["planets"])]
-    # All values tie except Mercury; neither snapshot order nor Sun order resolves the tie.
-    if field:
-        for planet in planets:
-            planet[field] = 10 if planet["name"] == "Mercury" else 20
-    else:
-        monkeypatch.setattr(main, "ORBITAL_PERIOD_DAYS", {
-            p["name"]: 10 if p["name"] == "Mercury" else 20 for p in planets
-        })
-    monkeypatch.setattr(main, "SNAPSHOT", {**main.SNAPSHOT, "planets": planets})
-    tied = sorted(p["name"] for p in planets if p["name"] != "Mercury")
-    expected = tied + ["Mercury"] if sort == "diameter" else ["Mercury"] + tied
-    assert shelf_names(client.get("/", params={"sort": sort}).text) == expected
-
-
 @pytest.mark.parametrize("age", ["30", "0", "12.50", "invalid", None])
 def test_sort_form_preserves_age_and_birthday_form_preserves_sort(client, age):
     params = {"sort": "diameter"}

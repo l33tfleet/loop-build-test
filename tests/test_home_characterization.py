@@ -276,10 +276,10 @@ def test_home_shelf(home):
         "sun": "In order from the Sun", "diameter": "Largest diameter first", "year": "Shortest year first",
     }[sort]
     cards = shelf.find_all("article")
-    assert [card.one("h2").text for card in cards] == (
+    assert [card.one("h3").text for card in cards] == (
         DIAMETER_ORDER if sort == "diameter" else SUN_ORDER
     )
-    by_name = {card.one("h2").text: card for card in cards}
+    by_name = {card.one("h3").text: card for card in cards}
     for name, ordinal, diameter, earths in PLANETS:
         card = by_name[name]
         assert card.one("p", **{"class": "order"}).text == f"{ordinal} from the Sun"

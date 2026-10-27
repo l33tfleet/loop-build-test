@@ -11,7 +11,7 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 .empty { padding: 32px 16px; border: 1px dashed var(--muted); border-radius: 12px; text-align: center; color: var(--muted); }
 .shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 16px; }
 .planet-card { position: relative; padding: 16px; border: 1px solid #24345e; border-radius: 12px; background: #13204a; min-width: 0; }
-.planet-card h2 { margin: 0 0 2px; color: var(--paper); font-size: 1.35rem; }
+.planet-card h3 { margin: 0 0 2px; color: var(--paper); font-size: 1.35rem; }
 .planet-card .order { margin: 0 0 8px; color: var(--muted); font-size: 0.85rem; }
 .planet-card .label { margin: 0; color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; }
 .planet-card .diameter { margin: 0; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
@@ -44,7 +44,7 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 .birthday-result strong { font-size: 1.5rem; font-variant-numeric: tabular-nums; }
 #age-error { color: #ffd3c6; }
 
-/* Shelf title sits above the grid, so it never takes a card cell; > keeps it off the card h2s. */
+/* Shelf title sits above the grid, so it never takes a card cell; > keeps it off the card h3s. */
 .planet-shelf > h2 { margin: 0 0 4px; color: var(--paper); font-size: 1.35rem; }
 .shelf-note { margin: 0 0 16px; color: var(--muted); font-size: 0.9rem; }
 /* Cards keep a readable width on large screens. */
@@ -53,7 +53,7 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 @media (max-width: 420px) {
   .shelf { grid-template-columns: repeat(auto-fill, minmax(min(100%, 165px), 1fr)); gap: 12px; }
   .planet-card { padding: 12px; }
-  .planet-card h2 { font-size: 1.2rem; }
+  .planet-card h3 { font-size: 1.2rem; }
   .planet-card .diameter { font-size: 1.05rem; }
   .planet-card .earths { font-size: 0.8rem; }
 }
