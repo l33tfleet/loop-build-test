@@ -142,3 +142,10 @@ def test_invalid_third_round_answer_does_not_complete_game(client):
     assert "Choose one of the two planets in this round." in response.text
     assert "You got" not in response.text
     assert "Play again" not in response.text
+
+
+@pytest.mark.parametrize("score", ["00", "01", "+1", " 1", "1 ", "１", "١", "3.0"])
+def test_only_canonical_score_strings_are_accepted(client, score):
+    panel = quiz(client.get("/", params={"round": "1", "choice": "jupiter", "score": score}))
+    assert form(panel)[1]["score"] == "0"
+    assert next_link(panel) == "/?round=2&score=1"

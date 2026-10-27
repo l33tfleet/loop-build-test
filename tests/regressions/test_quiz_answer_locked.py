@@ -65,8 +65,10 @@ def test_each_answer_reveals_values_and_next_wraps(client, number, left, left_km
     for attrs, body in buttons(panel):
         assert re.search(r"\bdisabled\b", attrs)
         assert ("Your pick" in body) == (f'value="{choice}"' in attrs)
-    link = re.search(r'<a class="quiz-next" href="([^"]+)">Next</a>', panel)
-    assert link and link.group(1) == f"/?round={number % 3 + 1}"
+    label = "Next" if number < 3 else "Play again"
+    link = re.search(rf'<a class="quiz-next" href="([^"]+)">{label}</a>', panel)
+    expected = f"/?round={number + 1}&score={int(choice == winner)}" if number < 3 else "/?round=1"
+    assert link and link.group(1).replace("&amp;", "&") == expected
     next_panel = quiz(client.get(link.group(1)))
     assert f"Round {number % 3 + 1} of 3" in next_panel
     assert "Correct" not in next_panel and "Not quite" not in next_panel
