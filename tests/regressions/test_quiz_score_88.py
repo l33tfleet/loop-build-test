@@ -124,3 +124,21 @@ def test_normalized_score_carries_through_next(client, score):
     assert form(panel)[1]["score"] == "0"
     following = quiz(client.get(next_link(panel)))
     assert form(following)[1] == {"round": "2", "score": "1"}
+
+
+def test_revisiting_answer_uses_incoming_score_without_accumulating(client):
+    params = {"round": "3", "score": "2", "choice": "uranus"}
+    answered = quiz(client.get("/", params=params))
+    assert "You got 3 of 3!" in answered
+    action, fields = form(answered)
+    revised = quiz(client.get(action, params={**fields, "choice": "neptune"}))
+    assert "You got 2 of 3!" in revised
+    assert form(revised)[1]["score"] == "2"
+
+
+def test_invalid_third_round_answer_does_not_complete_game(client):
+    response = client.get("/?round=3&choice=pluto&score=2")
+    assert response.status_code == 422
+    assert "Choose one of the two planets in this round." in response.text
+    assert "You got" not in response.text
+    assert "Play again" not in response.text
