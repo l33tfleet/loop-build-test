@@ -12,7 +12,7 @@
           {% for p in quiz.sides %}
           {% if quiz.choice %}
           {% set picked = p.name == quiz.choice.name %}
-          <button type="submit" name="choice" value="{{ p.name|lower }}" disabled aria-pressed="{{ "true" if picked else "false" }}">{{ p.name }}{% if picked %} <span class="quiz-pick">Your pick</span>{% endif %}</button>
+          <button type="submit" name="choice" value="{{ p.name|lower }}" disabled aria-pressed="{{ "true" if picked else "false" }}">{{ p.name }}{% if picked %} <span class="quiz-pick">Your pick</span>{% endif %}{% if p.name == quiz.winner.name %} <span class="quiz-larger">Larger ✓</span>{% endif %}</button>
           {% else %}
           <button type="submit" name="choice" value="{{ p.name|lower }}">{{ p.name }}</button>
           {% endif %}
