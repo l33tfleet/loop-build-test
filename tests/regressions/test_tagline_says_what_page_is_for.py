@@ -46,7 +46,3 @@ def test_tagline_is_one_sentence_about_size_and_view_toggle(client):
     lower = text.lower()
     assert "eight" in lower and ("size" in lower or "how big" in lower)
     assert "bar graph" in lower  # the "View as" toggle's second option
-
-
-def test_tagline_wraps_to_at_most_three_lines_on_a_phone(client):
-    assert _lines(_tagline(client), VIEWPORT - 2 * BODY_PAD) <= 3

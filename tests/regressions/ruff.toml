@@ -6,3 +6,4 @@ src = ["../.."]
 
 [lint.per-file-ignores]
 "test_quiz_true_diameter_circles.py" = ["F401"]
+"test_tagline_names_sections_in_page_order.py" = ["F401"]

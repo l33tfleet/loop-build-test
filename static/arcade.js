@@ -95,6 +95,12 @@
     return target;
   }
 
+  // The tagline's "bar graph" words jump to the scale with Bar graph picked; without this they still jump.
+  function pickBarsFromTagline(link) {
+    var bars = document.getElementById("scale-view-bars");
+    if (bars && link.hash === "#scale-title" && link.closest(".tagline")) bars.checked = true;
+  }
+
   window.addEventListener("hashchange", function () {
     var target = revealJumpTarget(window.location.hash);
     if (target) target.scrollIntoView();
@@ -104,7 +110,10 @@
     if (event.defaultPrevented || event.button !== 0) return;
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     var link = event.target.closest("a[href]");
-    if (link && link.hash && link.pathname === window.location.pathname) revealJumpTarget(link.hash);
+    if (link && link.hash && link.pathname === window.location.pathname) {
+      revealJumpTarget(link.hash);
+      pickBarsFromTagline(link);
+    }
     var origin = link && regionOf(link);
     var url = link && homeUrl(link.href);
     if (!origin || !url || link.target) return;
