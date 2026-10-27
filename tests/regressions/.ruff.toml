@@ -1,0 +1,6 @@
+# ruff.toml here is append-only like the tests, so later per-file ignores go in this file, which ruff reads first.
+# Superseded tests were removed from these files, leaving an import unused that the file itself may not drop.
+extend = "ruff.toml"
+
+[lint.extend-per-file-ignores]
+"test_rocky_inset.py" = ["F401"]

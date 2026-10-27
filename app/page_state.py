@@ -1,7 +1,5 @@
 """URL state the home page sections share, parsed once per request."""
 
-SORT_KEYS = ("sun", "diameter", "year")
-
 
 def _ordinal(n):
     """1 -> '1st', 2 -> '2nd', 11 -> '11th', 23 -> '23rd'."""
@@ -18,17 +16,16 @@ def _earths(diameter_km, earth_km):
 def build(params, snapshot, periods):
     """Shared state: query parameters plus the planet snapshot every section reads.
 
-    `age` is the raw Earth age (None when absent); sections validate it. `params` keeps the raw
-    query so a section can read parameters only it uses.
+    `age` and `sort` are raw query values (None when absent); sections validate them.
+    `params` keeps the raw query so a section can read parameters only it uses.
     """
-    sort = params.get("sort", "sun")
     earth = next(p for p in snapshot["planets"] if p["name"] == "Earth")
     planets = [{**p, "ordinal": _ordinal(p["order"]), "earths": _earths(p["diameter_km"], earth["diameter_km"])}
                for p in sorted(snapshot["planets"], key=lambda p: (p["order"], p["name"].lower()))]
     return {
         "params": params,
         "age": params.get("age"),
-        "sort": sort if sort in SORT_KEYS else "sun",
+        "sort": params.get("sort"),
         "left": params.get("left", "jupiter"),
         "right": params.get("right", "earth"),
         "planets": planets,  # Sun order

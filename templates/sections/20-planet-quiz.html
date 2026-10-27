@@ -4,7 +4,7 @@
       <p role="alert">{{ quiz.error }}</p>
       <a class="quiz-next" href="/?round=1">Start at round 1</a>
       {% else %}
-      <p class="quiz-round">Round {{ quiz.number }} of 3</p>
+      <p class="quiz-round">Round {{ quiz.number }} of {{ quiz.rounds }}</p>
       <form action="/" method="get">
         <input type="hidden" name="round" value="{{ quiz.number }}">
         <input type="hidden" name="score" value="{{ quiz.score }}">
@@ -13,7 +13,7 @@
           {% for p in quiz.sides %}
           {% if quiz.choice %}
           {% set picked = p.name == quiz.choice.name %}
-          <button type="submit" name="choice" value="{{ p.name|lower }}" disabled aria-pressed="{{ "true" if picked else "false" }}">{{ p.name }}{% if picked %} <span class="quiz-pick">Your pick</span>{% endif %}{% if p.name == quiz.winner.name %} <span class="quiz-larger">Larger ✓</span>{% endif %}</button>
+          <button type="submit" name="choice" value="{{ p.name|lower }}"{% if p.name == quiz.winner.name %} class="quiz-winner"{% endif %} disabled aria-pressed="{{ "true" if picked else "false" }}">{{ p.name }}{% if picked %} <span class="quiz-pick">Your pick</span>{% endif %}{% if p.name == quiz.winner.name %} <span class="quiz-larger">Larger ✓</span>{% endif %}</button>
           {% else %}
           <button type="submit" name="choice" value="{{ p.name|lower }}">{{ p.name }}</button>
           {% endif %}
@@ -40,7 +40,7 @@
         </ul>
         <p>{{ quiz.winner.name }} has the larger diameter.</p>
         {% if quiz.complete %}
-        <p>You got {{ quiz.resulting_score }} of 3!</p>
+        <p>You got {{ quiz.resulting_score }} of {{ quiz.rounds }}!</p>
         {% endif %}
       </div>
       {% if quiz.complete %}

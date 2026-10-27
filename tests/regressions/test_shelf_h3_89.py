@@ -210,3 +210,12 @@ def test_diameter_sort_keeps_planet_names_as_h3(client):
     html = client.get("/", params={"sort": "diameter"}).text
     names = re.findall(r'<article class="planet-card"[^>]*>\s*<h3>(.*?)</h3>', html)
     assert names == expected
+
+
+def test_card_heading_css_no_longer_targets_h2(client):
+    css = client.get("/static/arcade.css").text
+    assert not re.search(r"\.planet-card\s+h2\b", css)
+    for viewport, size in ((390, "1.2rem"), (992, "1.35rem")):
+        assert _decl(css, viewport, ".planet-card h3", "font-size") == size
+        assert _decl(css, viewport, ".planet-card h3", "margin") == "0 0 2px"
+        assert _decl(css, viewport, ".planet-card h3", "color") == "var(--paper)"
