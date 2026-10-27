@@ -192,3 +192,21 @@ def test_heading_outline_survives_shelf_sort(client, sort):
     assert len(headings) == 9
     assert all(level == "3" for level, _ in headings[1:])
     assert {name for _, name in headings[1:]} == set(SUN_ORDER)
+
+
+def test_snapshot_planet_names_render_as_h3(client):
+    names = [planet["name"] for planet in json.loads(SNAPSHOT.read_text())["planets"]]
+    cards = CARD.findall(client.get("/").text)
+    assert len(cards) == len(names) == 8
+    assert [re.findall(r"<h3\b[^>]*>(.*?)</h3>", body) for body in cards] == [
+        [name] for name in names
+    ]
+
+
+def test_diameter_sort_keeps_planet_names_as_h3(client):
+    expected = [planet["name"] for planet in sorted(
+        main.SNAPSHOT["planets"], key=lambda planet: -planet["diameter_km"]
+    )]
+    html = client.get("/", params={"sort": "diameter"}).text
+    names = re.findall(r'<article class="planet-card"[^>]*>\s*<h3>(.*?)</h3>', html)
+    assert names == expected
