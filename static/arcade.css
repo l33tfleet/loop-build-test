@@ -169,6 +169,7 @@ main:has(#scale-view-bars:checked) .rocky-inset { display: none; }
 .duel-side strong { display: block; color: var(--paper); font-size: 1.25rem; }
 .duel-ratio { margin: 16px 0 0; color: var(--paper); font-size: 1.5rem; text-align: center; }
 .duel-ratio strong { font-size: 2.25rem; font-variant-numeric: tabular-nums; }
+.duel-scale-note { max-width: 520px; margin: 8px auto 0; color: var(--muted); font-size: 0.9rem; text-align: center; }
 #duel-error { color: #ffd3c6; }
 
 .planet-quiz { margin-bottom: 24px; padding: 20px; border: 1px solid #536694; border-radius: 12px; background: #13204a; }

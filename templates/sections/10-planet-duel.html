@@ -18,6 +18,11 @@
       {% if duel.error %}
       <p id="duel-error" role="alert">{{ duel.error }}</p>
       {% else %}
+      {% if duel.same %}
+      <p class="duel-ratio" aria-live="polite">Both picks are {{ duel.big }}, so they are <strong>exactly the same size</strong>.</p>
+      {% else %}
+      <p class="duel-ratio" aria-live="polite">{{ duel.big }} is <strong>{{ duel.ratio }}</strong> times as wide as {{ duel.small }}.</p>
+      {% endif %}
       <div class="duel-portraits">
         {% for p in duel.sides %}
         <figure class="duel-side">
@@ -26,10 +31,6 @@
         </figure>
         {% endfor %}
       </div>
-      {% if duel.same %}
-      <p class="duel-ratio" aria-live="polite">Both picks are {{ duel.big }}, so they are <strong>exactly the same size</strong>.</p>
-      {% else %}
-      <p class="duel-ratio" aria-live="polite">{{ duel.big }} is <strong>{{ duel.ratio }}</strong> times as wide as {{ duel.small }}.</p>
-      {% endif %}
+      <p class="duel-scale-note">Drawn to scale for this pair only: the larger planet always fills the same circle.</p>
       {% endif %}
     </section>
