@@ -47,3 +47,12 @@ def test_sort_form_preserves_age_and_birthday_form_preserves_sort(client, age):
     birthday_form = next(form for form in forms if 'id="earth-age"' in form)
     assert any(tag == "input" and attrs.get("name") == "sort" and attrs.get("value") == "diameter"
                for tag, attrs in Controls(birthday_form).tags)
+
+
+def test_diameter_sort_keeps_planet_names_as_h3(client):
+    expected = [planet["name"] for planet in sorted(
+        main.SNAPSHOT["planets"], key=lambda planet: -planet["diameter_km"]
+    )]
+    html = client.get("/", params={"sort": "diameter"}).text
+    names = re.findall(r'<article class="planet-card"[^>]*>\s*<h3>(.*?)</h3>', html)
+    assert names == expected

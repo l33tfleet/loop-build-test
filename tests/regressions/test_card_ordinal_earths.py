@@ -17,3 +17,12 @@ def _cards(client):
     return cards
 
 
+def test_snapshot_planet_names_render_as_h3(client):
+    names = [planet["name"] for planet in json.loads(SNAPSHOT.read_text())["planets"]]
+    cards = CARD.findall(client.get("/").text)
+    assert len(cards) == len(names) == 8
+    assert [re.findall(r"<h3\b[^>]*>(.*?)</h3>", body) for body in cards] == [
+        [name] for name in names
+    ]
+
+
