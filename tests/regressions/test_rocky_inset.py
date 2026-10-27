@@ -1,3 +1,4 @@
+import itertools
 import re
 from html import unescape
 
