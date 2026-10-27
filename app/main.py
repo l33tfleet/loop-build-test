@@ -27,7 +27,7 @@ ORBITAL_PERIOD_DAYS = {
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     state = page_state.build(request.query_params, SNAPSHOT, ORBITAL_PERIOD_DAYS)
-    context = {k: v for k, v in state.items() if k not in ("params", "periods")}
+    context = {k: v for k, v in state.items() if k not in ("params", "periods", "sort")}
     status = 200
     found = sections.discover(SECTIONS_PACKAGE)
     for section in found:
