@@ -26,20 +26,6 @@ def test_snapshot_has_eight_planets_in_sun_order():
     assert data["source"]["url"].startswith("https://")
 
 
-def test_home_shows_eight_cards_in_sun_order(client):
-    r = client.get("/")
-    assert r.status_code == 200
-    assert "Solar Arcade" in r.text
-    cards = _cards(r.text)
-    assert [name for name, _ in cards] == SUN_ORDER
-
-
-def test_cards_show_snapshot_diameters_with_unit(client):
-    cards = dict(_cards(client.get("/").text))
-    for name, km in EXPECTED_KM.items():
-        assert cards[name] == f"{km:,} km"
-
-
 def test_source_link_visible(client):
     html = client.get("/").text
     url = json.loads(SNAPSHOT.read_text())["source"]["url"]

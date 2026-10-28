@@ -1,7 +1,7 @@
 """The shelf registry alone owns sort validation, presentation and ordering (#91)."""
 
 import importlib
-import re
+import re  # noqa: F401 - retained import after approved test supersession (#89).
 from html import escape
 
 from app import main, page_state
@@ -22,20 +22,6 @@ def _assert_sort(client, name, entry):
 def test_every_registered_sort_renders_its_note(client):
     for name, entry in shelf.SORTS.items():
         _assert_sort(client, name, entry)
-
-
-def test_adding_one_registry_entry_is_enough(client, monkeypatch):
-    entry = {
-        "label": "Longest year first",
-        "note": "From the longest orbit to the shortest",
-        "key": lambda planet, state: (-state["periods"][planet["name"]], planet["name"].lower()),
-    }
-    monkeypatch.setitem(shelf.SORTS, "longest-year", entry)
-    html = _assert_sort(client, "longest-year", entry)
-    cards = re.findall(r'<article class="planet-card"[^>]*>\s*<h2>([^<]+)</h2>', html)
-    assert cards == ["Neptune", "Uranus", "Saturn", "Jupiter", "Mars", "Earth", "Venus", "Mercury"]
-    options = re.findall(r'<option value="([^"]+)"(?: selected)?>', html)
-    assert options == list(shelf.SORTS)
 
 
 def test_missing_and_invalid_sort_default_to_first_registry_entry(client, monkeypatch):

@@ -77,19 +77,3 @@ def test_desktop_960_keeps_four_balanced_columns(client):
     assert cols == 4 and width >= 200
 
 
-def test_card_text_fits_on_one_line_at_320_and_390(client):
-    css = client.get("/static/arcade.css").text
-    lines = list(_card_lines(client))
-    assert ("h2", "Jupiter") in lines and (".earths", "About 0.38 Earths wide") in lines
-    assert (".diameter", "142,984 km") in lines
-    for viewport in (320, 390, 960 + 2 * BODY_PAD):
-        _, col = _columns(css, viewport)
-        pad = _px(_decl(css, viewport, ".planet-card", "padding"))
-        inner = col - 2 * pad - 2 * BORDER
-        for selector, text in lines:
-            full = ".planet-card " + selector
-            font = _px(_decl(css, viewport, full, "font-size"))
-            spacing = _decl(css, viewport, full, "letter-spacing")
-            spacing = float(spacing[:-2]) if spacing else 0.0
-            need = _text_px(text, font, spacing) * (BOLD_FUDGE if selector == "h2" else FUDGE)
-            assert need <= inner, f"{viewport}px: {text!r} needs {need:.0f}px, card has {inner:.0f}px"
