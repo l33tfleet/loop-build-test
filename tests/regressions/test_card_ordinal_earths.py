@@ -1,4 +1,4 @@
-import json
+import json  # noqa: F401 - retained after approved test supersession (#89).
 import re
 from html import unescape
 from pathlib import Path
@@ -15,11 +15,3 @@ def _cards(client):
         name = unescape(re.search(r"<h2[^>]*>(.*?)</h2>", body, re.DOTALL).group(1)).strip()
         cards[name] = " ".join(unescape(re.sub(r"<[^>]+>", " ", body)).split())
     return cards
-
-
-def test_snapshot_names_are_card_h3_headings(client):
-    names = [planet["name"] for planet in json.loads(SNAPSHOT.read_text())["planets"]]
-    cards = CARD.findall(client.get("/").text)
-    assert [re.findall(r"<h3\b[^>]*>(.*?)</h3>", body) for body in cards] == [
-        [name] for name in names
-    ]
