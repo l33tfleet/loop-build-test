@@ -23,6 +23,7 @@
       {% else %}
       <p class="duel-ratio" aria-live="polite">{{ duel.big }} is <strong>{{ duel.ratio }}</strong> times as wide as {{ duel.small }}.</p>
       {% endif %}
+      <p class="duel-scale-note">Drawn to scale for this pair only: the larger planet always fills the same circle.</p>
       <div class="duel-portraits">
         {% for p in duel.sides %}
         <figure class="duel-side">
@@ -31,6 +32,5 @@
         </figure>
         {% endfor %}
       </div>
-      <p class="duel-scale-note">Drawn to scale for this pair only: the larger planet always fills the same circle.</p>
       {% endif %}
     </section>

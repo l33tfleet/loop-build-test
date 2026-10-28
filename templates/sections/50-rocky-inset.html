@@ -1,6 +1,6 @@
     <section class="rocky-inset" aria-labelledby="inset-title">
       <h3 id="inset-title">Rocky planets, zoomed in</h3>
-      <p class="inset-note">Different scale from the chart above: here each circle's diameter is the planet's diameter divided by Earth's {{ "{:,}".format(earth.diameter_km) }} km, so Earth fills the panel width.</p>
+      <p class="inset-note">Different scale from the chart above: here each circle's diameter is the planet's diameter divided by Earth's {{ "{:,}".format(earth.diameter_km) }} km, so every circle is sized relative to Earth.</p>
       <ol class="inset-rows">
         {% for p in rocky %}
         <li class="inset-row" data-order="{{ p.order }}" style="--z: {{ p.z }}">

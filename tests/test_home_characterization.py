@@ -241,7 +241,7 @@ def test_home_rocky_inset(home):
     assert inset.one("h3").text == "Rocky planets, zoomed in"
     assert inset.one("p").text == (
         "Different scale from the chart above: here each circle's diameter is the planet's diameter "
-        "divided by Earth's 12,756 km, so Earth fills the panel width."
+        "divided by Earth's 12,756 km, so every circle is sized relative to Earth."
     )
     assert [node.text for node in inset.find_all("li")] == [
         f"{name} {diameter} km" for name, _, diameter, _ in PLANETS[:4]
