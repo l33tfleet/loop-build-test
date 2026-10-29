@@ -128,6 +128,8 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
    Earth's label sits above its rim, so the frame leaves room for two label lines above it. */
 .rocky-inset { margin: -16px 0 32px; padding: 16px; border: 1px solid #24345e; border-radius: 12px; background: #101b40; }
 main:has(#scale-view-bars:checked) .rocky-inset { display: none; }
+/* arcade.js corrects the scroll itself after an in-place update; native anchoring would correct it twice. */
+main { overflow-anchor: none; }
 .rocky-inset h3 { margin: 0 0 4px; color: var(--paper); font-size: 1.1rem; }
 .inset-note { margin: 0; color: var(--muted); font-size: 0.9rem; }
 .inset-rows { position: relative; display: block; aspect-ratio: 1; width: min(100%, 320px); margin: 2.5rem auto 0;

@@ -50,7 +50,12 @@
       var old = sameRegion(fresh.getAttribute("data-region"));
       if (old && old.outerHTML !== fresh.outerHTML) old.replaceWith(document.adoptNode(fresh));
     });
-    if (push) history.pushState(null, "", url);
+    // Keep the page's hash (e.g. #duel-title from the section nav) so back/forward and reloads stay on this section.
+    if (push) {
+      var pushed = new URL(url);
+      if (window.location.hash) pushed.hash = window.location.hash;
+      history.pushState(null, "", pushed.href);
+    }
     // Undo only the shift the swap caused, so the tapped section stays put even if sections above changed height.
     var current = sameRegion(name);
     window.scrollBy(0, current.getBoundingClientRect().top - before);
