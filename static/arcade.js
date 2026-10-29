@@ -3,9 +3,6 @@
 (function () {
   "use strict";
 
-  // update() corrects the scroll itself after an in-place swap; native scroll anchoring would correct it twice.
-  if (document.documentElement) document.documentElement.style.overflowAnchor = "none";
-
   function regionOf(node) {
     return node.closest("[data-region]");
   }
@@ -82,7 +79,19 @@
     var data = new FormData(form);
     var submitter = event.submitter;
     if (submitter && submitter.name) data.append(submitter.name, submitter.value);
-    url.search = new URLSearchParams(data).toString();
+    // Start from the page's current query so other sections keep their state, then overwrite this form's fields.
+    var params = new URL(window.location.href).searchParams;
+    Array.prototype.forEach.call(form.elements || [], function (field) {
+      if (field.name) params.delete(field.name);
+    });
+    var pairs = Array.from(data);
+    pairs.forEach(function (pair) {
+      params.delete(pair[0]);
+    });
+    pairs.forEach(function (pair) {
+      params.append(pair[0], pair[1]);
+    });
+    url.search = params.toString();
     update(url.href, origin, true);
   });
 
