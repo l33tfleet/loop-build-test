@@ -1,6 +1,6 @@
 """Planet diameter quiz: each round picks the larger of two planets."""
 # ruff: noqa: N999 -- the NN_ prefix is the section's place on the page, by convention
-from app.scale_labels import to_scale
+from app.scale_labels import by_slug, to_scale
 
 QUIZ_PAIRS = (("jupiter", "earth"), ("mercury", "mars"), ("neptune", "uranus"))
 QUIZ_SETS = (
@@ -19,12 +19,12 @@ def _quiz(planets, round_number, choice, score, pairs):
     pair = pairs[number - 1]
     if choice is not None and choice not in pair:
         return {"error": "Choose one of the two planets in this round."}
-    by_slug = {p["name"].lower(): p for p in planets}
-    winner = max((by_slug[slug] for slug in pair), key=lambda p: p["diameter_km"])
-    sides = to_scale((by_slug[slug] for slug in pair), winner["diameter_km"])
+    lookup = by_slug(planets)
+    winner = max((lookup[slug] for slug in pair), key=lambda p: p["diameter_km"])
+    sides = to_scale((lookup[slug] for slug in pair), winner["diameter_km"])
     correct = choice == winner["name"].lower()
     return {"number": number, "rounds": rounds, "sides": sides,
-            "choice": by_slug[choice] if choice else None,
+            "choice": lookup[choice] if choice else None,
             "winner": winner, "correct": correct, "next": number + 1,
             "score": score, "resulting_score": min(rounds, score + correct),
             "complete": number == rounds and choice is not None}

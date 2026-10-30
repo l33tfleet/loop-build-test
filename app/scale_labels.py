@@ -1,4 +1,4 @@
-"""Label placement for overlapping planet circles, shared by the diameter scale and the rocky inset."""
+"""Shared planet scaling, slug lookup and label placement for page sections."""
 
 LEADER_BELOW = 20  # circles under this % of the frame are too small to hold a label
 CROWDED = 12  # big circles whose tops are this close get labels on opposite sides of the rim
@@ -11,6 +11,11 @@ def to_scale(planets, reference_km):
     width_pct = round(100 * diameter_km / reference_km, 4), rounded to four decimals.
     """
     return [{**p, "width_pct": round(100 * p["diameter_km"] / reference_km, 4)} for p in planets]
+
+
+def by_slug(planets):
+    """Map lowercase planet names to the original planet dictionaries."""
+    return {p["name"].lower(): p for p in planets}
 
 
 def place_labels(scale):
