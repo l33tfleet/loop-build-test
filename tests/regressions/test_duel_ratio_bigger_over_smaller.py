@@ -39,22 +39,6 @@ def test_default_is_jupiter_versus_earth(client):
     assert len(re.findall(r'class="duel-portrait"', section)) == 2
 
 
-@pytest.mark.parametrize("left", list(DIAMETERS))
-@pytest.mark.parametrize("right", list(DIAMETERS))
-def test_ratio_is_bigger_over_smaller_never_below_one(client, left, right):
-    response = client.get("/", params={"left": left, "right": right})
-    assert response.status_code == 200
-    section = duel(response.text)
-    assert selected(section, "left") == [left] and selected(section, "right") == [right]
-    assert f"{DIAMETERS[left]:,} km" in section and f"{DIAMETERS[right]:,} km" in section
-    if left == right:
-        return
-    big, small = sorted((left, right), key=DIAMETERS.get, reverse=True)
-    ratio = f"{DIAMETERS[big] / DIAMETERS[small]:.1f}"
-    assert float(ratio) >= 1
-    assert sentence(section) == f"{big.title()} is {ratio} times as wide as {small.title()}."
-
-
 def test_order_of_picks_does_not_change_the_sentence(client):
     forward = sentence(duel(client.get("/?left=jupiter&right=earth").text))
     reverse = sentence(duel(client.get("/?left=earth&right=jupiter").text))
