@@ -4,7 +4,7 @@ from app.scale_labels import to_scale
 
 
 def context(state):
-    """Ratio is bigger / smaller to one decimal."""
+    """Format bigger/smaller to two decimals below 2 (unrounded), otherwise one."""
     by_slug = {p["name"].lower(): p for p in state["planets"]}
     left, right = state["left"], state["right"]
     if left not in by_slug or right not in by_slug:
@@ -15,5 +15,7 @@ def context(state):
     largest = max(a["diameter_km"], b["diameter_km"])
     sides = to_scale((a, b), largest)
     big, small = sorted((a, b), key=lambda p: p["diameter_km"], reverse=True)
+    ratio = big["diameter_km"] / small["diameter_km"]
+    formatted_ratio = format(ratio, ".2f" if ratio < 2 else ".1f")
     return {"duel": {"left": left, "right": right, "sides": sides, "same": left == right, "big": big["name"],
-                     "small": small["name"], "ratio": f"{big['diameter_km'] / small['diameter_km']:.1f}"}}
+                     "small": small["name"], "ratio": formatted_ratio}}
