@@ -26,8 +26,6 @@ def build(params, snapshot, periods):
         "params": params,
         "age": params.get("age"),
         "sort": params.get("sort"),
-        "left": params.get("left", "jupiter"),
-        "right": params.get("right", "earth"),
         "planets": planets,  # Sun order
         "earth": earth,
         "periods": periods,  # orbital period in Earth days, by planet name

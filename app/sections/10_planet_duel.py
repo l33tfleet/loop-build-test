@@ -2,13 +2,20 @@
 # ruff: noqa: N999 -- the NN_ prefix is the section's place on the page, by convention
 from app.scale_labels import by_slug, to_scale
 
+DEFAULT_PAIR = ("jupiter", "earth")
+
 
 def context(state):
-    """Format bigger/smaller to two decimals below 2 (unrounded), otherwise one."""
+    """Return a duel dict with scaled sides and ratio, or an error and status_code=422.
+
+    Read raw params, falling back to legacy top-level picks when params is absent.
+    """
     lookup = by_slug(state["planets"])
-    left, right = state["left"], state["right"]
+    params = state.get("params", state)
+    left = params.get("left", DEFAULT_PAIR[0])
+    right = params.get("right", DEFAULT_PAIR[1])
     if left not in lookup or right not in lookup:
-        return {"duel": {"left": "jupiter", "right": "earth",
+        return {"duel": {"left": DEFAULT_PAIR[0], "right": DEFAULT_PAIR[1],
                          "error": "Choose two planets from the lists: unknown planet name."},
                 "status_code": 422}
     a, b = lookup[left], lookup[right]
