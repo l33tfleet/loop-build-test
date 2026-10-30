@@ -50,7 +50,12 @@
       var old = sameRegion(fresh.getAttribute("data-region"));
       if (old && old.outerHTML !== fresh.outerHTML) old.replaceWith(document.adoptNode(fresh));
     });
-    if (push) history.pushState(null, "", url);
+    // Keep the page's hash (e.g. #duel-title from the section nav) so back/forward and reloads stay on this section.
+    if (push) {
+      var pushed = new URL(url);
+      if (window.location.hash) pushed.hash = window.location.hash;
+      history.pushState(null, "", pushed.href);
+    }
     // Undo only the shift the swap caused, so the tapped section stays put even if sections above changed height.
     var current = sameRegion(name);
     window.scrollBy(0, current.getBoundingClientRect().top - before);
@@ -74,7 +79,19 @@
     var data = new FormData(form);
     var submitter = event.submitter;
     if (submitter && submitter.name) data.append(submitter.name, submitter.value);
-    url.search = new URLSearchParams(data).toString();
+    // Start from the page's current query so other sections keep their state, then overwrite this form's fields.
+    var params = new URL(window.location.href).searchParams;
+    Array.prototype.forEach.call(form.elements || [], function (field) {
+      if (field.name) params.delete(field.name);
+    });
+    var pairs = Array.from(data);
+    pairs.forEach(function (pair) {
+      params.delete(pair[0]);
+    });
+    pairs.forEach(function (pair) {
+      params.append(pair[0], pair[1]);
+    });
+    url.search = params.toString();
     update(url.href, origin, true);
   });
 
