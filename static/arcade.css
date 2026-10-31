@@ -171,6 +171,11 @@ main { overflow-anchor: none; }
                  background: radial-gradient(circle at 35% 30%, rgb(255 255 255 / 0.5), transparent 55%), var(--planet-surface); }
 .duel-side figcaption { margin-top: 8px; }
 .duel-side strong { display: block; color: var(--paper); font-size: 1.25rem; }
+.duel-count { min-inline-size: 0; text-align: center; }
+.duel-row { display: flex; width: 100%; overflow: hidden; }
+.duel-row-circle { display: block; flex: none; width: var(--circle); aspect-ratio: 1; border-radius: 50%;
+  background: var(--paper); }
+.duel-row-caption { margin: 8px 0 0; color: var(--paper); font-size: 0.9rem; }
 .duel-ratio { margin: 16px 0 0; color: var(--paper); font-size: 1.5rem; text-align: center; }
 .duel-ratio strong { font-size: 2.25rem; font-variant-numeric: tabular-nums; }
 .duel-scale-note { max-width: 520px; margin: 8px auto 0; color: var(--muted); font-size: 0.9rem; text-align: center; }

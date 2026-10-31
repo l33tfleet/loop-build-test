@@ -1,5 +1,7 @@
 """Planet size duel: two planets side by side drawn to true scale."""
 # ruff: noqa: N999 -- the NN_ prefix is the section's place on the page, by convention
+import math
+
 from app.scale_labels import by_slug, to_scale
 
 DEFAULT_PAIR = ("jupiter", "earth")
@@ -24,5 +26,11 @@ def context(state):
     big, small = sorted((a, b), key=lambda p: p["diameter_km"], reverse=True)
     ratio = big["diameter_km"] / small["diameter_km"]
     formatted_ratio = format(ratio, ".2f" if ratio < 2 else ".1f")
-    return {"duel": {"left": left, "right": right, "sides": sides, "same": left == right, "big": big["name"],
-                     "small": small["name"], "ratio": formatted_ratio}}
+    duel = {"left": left, "right": right, "sides": sides, "same": left == right, "big": big["name"],
+            "small": small["name"], "ratio": formatted_ratio}
+    if left != right:
+        # One circle per started width: the row's overflow clips the last one to the ratio's fraction.
+        duel["row"] = {"count": math.ceil(ratio), "circle_pct": min(side["width_pct"] for side in sides),
+                       "column": 1 if a is big else 2,
+                       "plural": small["name"] + ("es" if small["name"].endswith("s") else "s")}
+    return {"duel": duel}

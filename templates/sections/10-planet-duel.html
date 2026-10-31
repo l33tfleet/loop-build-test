@@ -31,6 +31,14 @@
           <figcaption><strong>{{ p.name }}</strong> <span>{{ "{:,}".format(p.diameter_km) }} km</span></figcaption>
         </figure>
         {% endfor %}
+        {% if duel.row %}
+        <div class="duel-count" style="grid-column: {{ duel.row.column }}">
+          <span class="duel-row" aria-hidden="true" style="--circle: {{ duel.row.circle_pct }}%">
+            {% for _ in range(duel.row.count) %}<span class="duel-row-circle"></span>{% endfor %}
+          </span>
+          <p class="duel-row-caption">{{ duel.ratio }} {{ duel.row.plural }} across {{ duel.big }}</p>
+        </div>
+        {% endif %}
       </div>
       {% endif %}
     </section>
