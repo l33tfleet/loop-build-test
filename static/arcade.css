@@ -208,6 +208,13 @@ main { overflow-anchor: none; }
 .quiz-scale[data-scale="neutral"] .quiz-planet { background: radial-gradient(circle at 35% 30%, #8a96b8, #4a5679 70%); }
 .quiz-name { margin-top: 8px; color: var(--paper); font-weight: 600; }
 .quiz-scale-note { margin: 0 0 12px; color: var(--muted); font-size: 0.9rem; }
+/* Perfect score: paper on the navy status box (≈15:1). The text carries the win; the bounce is extra. */
+.quiz-perfect { color: var(--paper); font-size: 1.25rem; font-weight: 700; }
+.quiz-handover { color: var(--paper); }
+@media (prefers-reduced-motion: no-preference) {
+  .quiz-side-perfect { animation: quiz-bounce 0.6s ease-out 1; }
+  @keyframes quiz-bounce { 40% { transform: translateY(-14px); } 70% { transform: translateY(0); } 85% { transform: translateY(-5px); } }
+}
 
 /* Planet colours for every circle (and bar): each one at least 3:1 against the navy panels.
    --planet is the base colour; --planet-surface is the fill, banded for the gas giants. */
