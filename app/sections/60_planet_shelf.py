@@ -12,11 +12,13 @@ SORTS = {
     "diameter": {
         "label": "Largest diameter first",
         "note": "Largest diameter first",
+        "rank": "widest",
         "key": lambda p, state: (-p["diameter_km"], p["name"].lower()),
     },
     "year": {
         "label": "Shortest year first",
         "note": "Shortest year first",
+        "rank": "shortest year",
         "key": lambda p, state: (state["periods"][p["name"]], p["name"].lower()),
     },
 }
@@ -25,8 +27,12 @@ SORTS = {
 def context(state):
     sort = state["sort"] if state["sort"] in SORTS else next(iter(SORTS))
     key = SORTS[sort]["key"]
+    label = SORTS[sort].get("rank")
+    ordered = sorted(state["planets"], key=lambda p: key(p, state))
     return {
         "sort": sort,
         "SORTS": SORTS,
-        "shelf": sorted(state["planets"], key=lambda p: key(p, state)),
+        "shelf": [
+            {**p, "rank": i, "rank_label": label} for i, p in enumerate(ordered, start=1)
+        ],
     }
