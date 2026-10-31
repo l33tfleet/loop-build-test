@@ -12,6 +12,7 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 .shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 16px; }
 .planet-card { position: relative; padding: 16px; border: 1px solid #24345e; border-radius: 12px; background: #13204a; min-width: 0; }
 .planet-card h3 { margin: 0 0 2px; color: var(--paper); font-size: 1.35rem; }
+.planet-card .rank { margin: 0 0 4px; color: var(--paper); font-size: 0.9rem; font-weight: 600; }
 .planet-card .order { margin: 0 0 8px; color: var(--muted); font-size: 0.875rem; }
 .planet-card .label { margin: 0; color: var(--muted); font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.06em; }
 .planet-card .diameter { margin: 0; font-size: 1.15rem; font-variant-numeric: tabular-nums; }

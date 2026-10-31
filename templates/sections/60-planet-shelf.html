@@ -14,7 +14,8 @@
       <div class="shelf">
       {% for p in shelf %}
       <article class="planet-card" data-order="{{ p.order }}">
-        <h3>{{ p.name }}</h3>
+        <h3>{{ p.name }}</h3>{% if p.rank_label %}
+        <p class="rank">#{{ p.rank }} {{ p.rank_label }}</p>{% endif %}
         <p class="order">{{ p.ordinal }} from the Sun</p>
         <p class="label">Diameter</p>
         <p class="diameter">{{ "{:,}".format(p.diameter_km) }} km</p>
