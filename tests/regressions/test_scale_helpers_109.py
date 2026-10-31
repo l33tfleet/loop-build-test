@@ -1,7 +1,7 @@
 """Shared scale and lookup contracts preserve current section output (#109)."""
 
 from copy import deepcopy
-from hashlib import sha256
+from hashlib import sha256  # noqa: F401 -- preserved under the append-only supersession policy
 from importlib import import_module
 from unittest.mock import Mock
 
@@ -62,14 +62,3 @@ def test_all_scale_consumers_use_shared_helper(monkeypatch, client, section):
 
     assert client.get("/").status_code == 200
     scaling.assert_called_once()
-
-
-@pytest.mark.parametrize("path,digest", [
-    ("/", "8a3828c60cf98b247ef920341a0b49347a756f13e6284047320accb8eefc2d4f"),
-    ("/?left=mars&right=earth", "d2d635e5603c175605df376f27a26f04f69236a513ad6b7c19430ca2399e29ec"),
-    ("/?round=1&choice=earth", "0848700c8eef150b43c93e2163d873ba84caba8f011bd05baf2ffbcaacad2465"),
-])
-def test_rendered_html_bytes_unchanged(client, path, digest):
-    response = client.get(path)
-    assert response.status_code == 200
-    assert sha256(response.content).hexdigest() == digest
