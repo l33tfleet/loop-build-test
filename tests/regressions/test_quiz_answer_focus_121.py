@@ -305,3 +305,25 @@ def test_answer_focus_with_other_sections_in_bookmarked_url(client, round_, choi
     assert "You chose" in log["status"]
     assert log["attrs"].get("aria-description") == " ".join(log["status"].split())
     assert log["url"] == "http://testserver" + answer + "#quiz-title"
+
+
+@pytest.mark.parametrize("set_", range(3))
+@pytest.mark.parametrize("round_", range(1, 4))
+def test_each_rendered_answer_hands_focus_to_continuation(client, set_, round_):
+    start = f"/?set={set_}&round={round_}&score=0"
+    quiz = next(r for r in Regions(client.get(start).text).regions if r["name"] == "planet-quiz")
+    choices = [n["attrs"]["value"] for n in quiz["nodes"]
+               if n["tag"] == "button" and n["attrs"].get("name") == "choice"]
+    assert len(choices) == 2
+    for choice in choices:
+        answer = start + "&choice=" + choice
+        step = {"region": "planet-quiz", "fields": [["round", str(round_)], ["score", "0"]],
+                "choice": choice, "focus": f'button[name="choice"][value="{choice}"]'}
+        log, = run(client, start, [step], [answer])
+        assert log["tag"] == "A", log
+        assert log["text"] == ("Play again" if round_ == 3 else "Next")
+        assert log["attrs"]["href"]
+        assert log["options"] == {"preventScroll": True}
+        assert log["scrollDelta"] == pytest.approx(-75)
+        assert "You chose" in log["status"]
+        assert log["attrs"].get("aria-description") == " ".join(log["status"].split())
