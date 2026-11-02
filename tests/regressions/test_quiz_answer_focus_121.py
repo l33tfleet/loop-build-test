@@ -896,3 +896,33 @@ def test_final_answer_after_shelf_sort_restores_only_quiz_owned_focus(client, fo
     assert result["scrollDelta"] == pytest.approx(-75)
     assert "You chose Neptune" in result["status"]
     assert "You got 0 of 3!" in result["status"]
+
+
+@pytest.mark.parametrize("round_,choice,label", [(1, "earth", "Next"), (3, "neptune", "Play again")])
+@pytest.mark.parametrize("focused_answer", [True, False], ids=["answer-focus", "duel-focus"])
+def test_answer_after_duel_update_restores_only_quiz_owned_focus(client, round_, choice, label, focused_answer):
+    """An earlier duel update must not interfere with quiz-owned focus restoration."""
+    start = f"/?round={round_}&score=0"
+    duel = start + "&left=mars&right=jupiter"
+    answer = f"/?left=mars&right=jupiter&round={round_}&score=0&choice={choice}"
+    steps = [
+        {"region": "planet-duel", "focus": "#duel-left-mars",
+         "fields": [["left", "mars"], ["right", "jupiter"]]},
+        {"region": "planet-quiz", "fields": [["round", str(round_)], ["score", "0"]],
+         "choice": choice, "focus": f'button[value="{choice}"]' if focused_answer else None},
+    ]
+    compared, result = run(client, start, steps, [duel, answer])
+    assert compared["attrs"]["id"] == "duel-left-mars"
+    if focused_answer:
+        assert result["tag"] == "A", result
+        assert result["text"] == label
+        quiz = next(r for r in Regions(client.get(answer).text).regions if r["name"] == "planet-quiz")
+        continuation = next(n for n in quiz["nodes"] if n["attrs"].get("class") == "quiz-next")
+        assert result["attrs"]["href"] == continuation["attrs"]["href"]
+        assert result["attrs"].get("aria-description") == " ".join(result["status"].split())
+    else:
+        assert result["tag"] == "INPUT"
+        assert result["attrs"]["id"] == "duel-left-mars"
+    assert result["options"] == {"preventScroll": True}
+    assert result["scrollDelta"] == pytest.approx(-75)
+    assert f"You chose {choice.title()}" in result["status"]
