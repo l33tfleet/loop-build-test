@@ -1102,3 +1102,44 @@ def test_narrow_viewport_keyboard_answer_restores_continuation(client, round_, c
             assert page.evaluate("window.scrollY") == before
         finally:
             browser.close()
+
+
+@pytest.mark.parametrize("round_,choice,label", [(1, "earth", "Next"), (3, "neptune", "Play again")])
+def test_keyboard_answer_after_quiz_navigation_anchor(client, round_, choice, label):
+    """Answering after the Quiz jump preserves its scroll and continuation focus."""
+    sync_api = pytest.importorskip("playwright.sync_api")
+    base = "http://testserver"
+
+    def serve(route):
+        response = client.get(route.request.url[len(base):])
+        body = SCRIPT.read_bytes() if route.request.url == base + "/static/arcade.js" else response.content
+        route.fulfill(status=response.status_code, body=body,
+                      content_type=response.headers.get("content-type"))
+
+    with sync_api.sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        try:
+            page = browser.new_page(viewport={"width": 1000, "height": 800})
+            page.route("**/*", serve)
+            page.goto(f"{base}/?round={round_}")
+            jump = page.locator('a[href="#quiz-title"]')
+            jump.focus()
+            jump.press("Enter")
+            page.wait_for_url("**#quiz-title")
+            answer = page.locator(f'.planet-quiz button[value="{choice}"]')
+            answer.focus()
+            before = page.evaluate("window.scrollY")
+            assert before > 0
+            answer.press("Enter")
+            status = page.locator('.planet-quiz [role="status"]')
+            status.wait_for()
+            continuation = page.get_by_role("link", name=label, exact=True)
+            assert continuation.evaluate("el => el === document.activeElement")
+            assert continuation.evaluate("el => el.matches(':focus-visible')")
+            page.evaluate("() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))")
+            assert page.evaluate("window.scrollY") == before
+            assert page.url.endswith("#quiz-title")
+            assert f"You chose {choice.title()}" in status.inner_text()
+            assert continuation.get_attribute("aria-description") == " ".join(status.inner_text().split())
+        finally:
+            browser.close()
