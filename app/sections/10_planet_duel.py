@@ -27,7 +27,11 @@ def context(state):
     ratio = big["diameter_km"] / small["diameter_km"]
     formatted_ratio = format(ratio, ".2f" if ratio < 2 else ".1f")
     duel = {"left": left, "right": right, "sides": sides, "same": left == right, "big": big["name"],
-            "small": small["name"], "ratio": formatted_ratio}
+            "small": small["name"], "ratio": formatted_ratio, "reference": big}
+    earth_km = lookup.get("earth", {}).get("diameter_km")
+    if earth_km and largest >= earth_km:
+        # Earth on the larger planet's scale, drawn only while it still fits inside that frame.
+        duel["earth_ring"] = {"column": 0 if a is big else 1, "pct": round(100 * earth_km / largest, 4)}
     if left != right:
         # One circle per started width: the row's overflow clips the last one to the ratio's fraction.
         duel["row"] = {"count": math.ceil(ratio), "circle_pct": min(side["width_pct"] for side in sides),

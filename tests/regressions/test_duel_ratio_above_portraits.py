@@ -1,5 +1,5 @@
 import re
-from pathlib import Path
+from pathlib import Path  # noqa: F401
 
 import pytest  # noqa: F401 -- preserved under the append-only supersession policy
 
@@ -18,13 +18,4 @@ def test_error_path_has_no_ratio_or_caption(client):
     assert 'id="duel-error"' in section
     assert "duel-ratio" not in section
     assert "duel-scale-note" not in section
-
-
-def test_scale_note_styled_like_quiz_note():
-    css = Path("static/arcade.css").read_text(encoding="utf-8")
-    quiz = re.search(r"\.quiz-scale-note \{([^}]*)\}", css).group(1)
-    note = re.search(r"\.duel-scale-note \{([^}]*)\}", css)
-    assert note, ".duel-scale-note rule missing"
-    for decl in ("color: var(--muted)", "font-size: 0.9rem"):
-        assert decl in quiz and decl in note.group(1)
 

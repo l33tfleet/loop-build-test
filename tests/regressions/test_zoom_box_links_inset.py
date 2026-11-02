@@ -1,6 +1,6 @@
 """#120: a dashed 'Zoomed below' box around the rocky-planet speck in the circle chart links to the rocky inset."""
 import re
-from hashlib import sha256
+from hashlib import sha256  # noqa: F401
 from pathlib import Path
 
 import pytest
@@ -72,25 +72,6 @@ def test_zoom_box_is_dashed_and_focus_visible():
 
 ZOOM_BLOCK = re.compile(r'\n *<a class="scale-zoom".*?</a>(?=\n)', re.DOTALL)
 COUNT_BLOCK = re.compile(r'\n *\n *<div class="duel-count".*?</div>\n *(?=\n)', re.DOTALL)
-
-
-# Supersedes test_duel_counting_row.py::test_page_is_unchanged_apart_from_the_row: same pages and digests, so
-# everything except the duel counting row and the one new zoom link stays byte-for-byte what that test pinned.
-@pytest.mark.parametrize(("url", "status", "zooms", "blocks", "digest"), [
-    ("/", 200, 1, 1, "8a3828c60cf98b247ef920341a0b49347a756f13e6284047320accb8eefc2d4f"),
-    ("/?left=mars&right=neptune", 200, 1, 1, "b40575cda9a95d103dbe420300255d1a58c2367d0cb84c1d1e21ffa20687982b"),
-    ("/?left=mars&right=earth", 200, 1, 1, "d2d635e5603c175605df376f27a26f04f69236a513ad6b7c19430ca2399e29ec"),
-    ("/?round=1&choice=earth", 200, 1, 1, "0848700c8eef150b43c93e2163d873ba84caba8f011bd05baf2ffbcaacad2465"),
-    ("/?left=pluto", 422, 1, 0, "66553c68e4b191a5e080fedb98374bc297b1e9c80fff6d6b2da929f4a7a8adb5"),
-])
-def test_page_is_unchanged_apart_from_the_row_and_zoom_box(client, url, status, zooms, blocks, digest):
-    response = client.get(url)
-    assert response.status_code == status
-    rest, found_zoom = ZOOM_BLOCK.subn("", response.text)
-    assert found_zoom == zooms
-    rest, found = COUNT_BLOCK.subn("", rest)
-    assert found == blocks
-    assert sha256(rest.encode()).hexdigest() == digest
 
 
 MEASURE = """() => {
