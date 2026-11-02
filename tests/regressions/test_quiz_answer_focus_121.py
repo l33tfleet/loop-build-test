@@ -289,3 +289,19 @@ def test_unfocused_quiz_answer_preserves_focus_in_another_region(client):
     assert first["attrs"]["id"] == second["attrs"]["id"] == "duel-left-mars"
     assert second["tag"] == "INPUT"
     assert "You chose Earth" in second["status"]
+
+
+@pytest.mark.parametrize("round_,choice,label", [(1, "earth", "Next"), (3, "neptune", "Play again")])
+def test_answer_focus_with_other_sections_in_bookmarked_url(client, round_, choice, label):
+    start = f"/?left=mars&right=jupiter&sort=diameter&round={round_}&score=0"
+    answer = start + "&choice=" + choice
+    step = {"region": "planet-quiz", "fields": [["round", str(round_)], ["score", "0"]],
+            "choice": choice, "focus": f'button[name="choice"][value="{choice}"]'}
+    log, = run(client, start, [step], [answer])
+    assert log["tag"] == "A", log
+    assert log["text"] == label
+    assert log["options"] == {"preventScroll": True}
+    assert log["scrollDelta"] == pytest.approx(-75)
+    assert "You chose" in log["status"]
+    assert log["attrs"].get("aria-description") == " ".join(log["status"].split())
+    assert log["url"] == "http://testserver" + answer + "#quiz-title"
