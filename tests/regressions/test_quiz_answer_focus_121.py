@@ -1281,3 +1281,29 @@ def test_default_home_quiz_answer_restores_focus(client, choice):
     assert result["scrollDelta"] == pytest.approx(-75)
     assert f"You chose {choice.title()}" in result["status"]
     assert result["attrs"].get("aria-description") == " ".join(result["status"].split())
+
+
+@pytest.mark.parametrize("round_", [1, 2, 3])
+@pytest.mark.parametrize("focused", [True, False], ids=["answer-focused", "body-focused"])
+def test_quiz_answer_handoff_requires_focus_owned_by_quiz(client, round_, focused):
+    """Every round hands off answer focus, while an unfocused submission leaves body alone."""
+    start = f"/?round={round_}&score=0"
+    quiz = next(r for r in Regions(client.get(start).text).regions if r["name"] == "planet-quiz")
+    choice = next(n["attrs"]["value"] for n in quiz["nodes"]
+                  if n["tag"] == "button" and n["attrs"].get("name") == "choice")
+    answer = start + f"&choice={choice}"
+    step = {"region": "planet-quiz", "fields": [["round", str(round_)], ["score", "0"]],
+            "choice": choice}
+    if focused:
+        step["focus"] = f'button[name="choice"][value="{choice}"]'
+    result, = run(client, start, [step], [answer])
+    assert f"You chose {choice.title()}" in result["status"]
+    assert result["scrollDelta"] == pytest.approx(-75)
+    if focused:
+        assert result["tag"] == "A", result
+        assert result["text"] == ("Play again" if round_ == 3 else "Next")
+        assert result["attrs"]["href"]
+        assert result["options"] == {"preventScroll": True}
+        assert result["attrs"].get("aria-description") == " ".join(result["status"].split())
+    else:
+        assert result["tag"] == "BODY", result
