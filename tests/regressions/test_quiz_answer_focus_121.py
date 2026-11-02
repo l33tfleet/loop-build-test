@@ -379,6 +379,31 @@ def test_keyboard_answer_in_browser(client, round_, choice, label, javascript):
             browser.close()
 
 
+@pytest.mark.parametrize("round_,choice,label", [(1, "earth", "Next"), (3, "neptune", "Play again")])
+def test_quiz_answer_redirect_precedes_generic_id_restore(client, monkeypatch, round_, choice, label):
+    """Choice buttons must use the continuation rule even when they have stable IDs."""
+    original_init = Regions.__init__
+
+    def with_answer_ids(self, html):
+        original_init(self, html)
+        for region in self.regions:
+            for node in region["nodes"]:
+                if node["tag"] == "button" and node["attrs"].get("name") == "choice":
+                    node["attrs"]["id"] = "answer-" + node["attrs"]["value"]
+
+    monkeypatch.setattr(Regions, "__init__", with_answer_ids)
+    start = f"/?round={round_}&score=0"
+    answer = start + "&choice=" + choice
+    step = {"region": "planet-quiz", "fields": [["round", str(round_)], ["score", "0"]],
+            "choice": choice, "focus": "#answer-" + choice}
+    log, = run(client, start, [step], [answer])
+    assert log["tag"] == "A", log
+    assert log["text"] == label
+    assert log["options"] == {"preventScroll": True}
+    assert log["scrollDelta"] == pytest.approx(-75)
+    assert log["attrs"].get("aria-description") == " ".join(log["status"].split())
+
+
 @pytest.mark.parametrize("focused_answer", [True, False], ids=["keyboard-answer", "outside-focus"])
 def test_browser_focus_across_quiz_duel_and_shelf(client, focused_answer):
     """Native focus survives other section updates, and quiz answers only move owned focus."""
