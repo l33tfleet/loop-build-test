@@ -183,9 +183,16 @@ main { overflow-anchor: none; }
 /* Duel drawing: equal columns share one bottom baseline; portrait width = diameter / larger diameter, no floor. */
 .duel-portraits { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 520px; margin: 20px auto 0; }
 .duel-side { display: flex; flex-direction: column; min-inline-size: 0; margin: 0; text-align: center; }
-.duel-frame { display: flex; flex: 1; align-items: flex-end; justify-content: center; }
+.duel-frame { position: relative; display: flex; flex: 1; align-items: flex-end; justify-content: center; }
 .duel-portrait { display: block; flex: none; aspect-ratio: 1; border-radius: 50%;
                  background: radial-gradient(circle at 35% 30%, rgb(255 255 255 / 0.5), transparent 55%), var(--planet-surface); }
+/* Earth at the larger planet's scale, on the same baseline as the real portrait. Faint, but legible on any surface. */
+.duel-earth-ring { position: absolute; bottom: 0; left: 50%; box-sizing: border-box; width: var(--ring); aspect-ratio: 1;
+                   border-radius: 50%; border: 2px dashed rgb(255 255 255 / 0.7); box-shadow: 0 0 0 1px rgb(11 21 48 / 0.35);
+                   transform: translateX(-50%); }
+.duel-earth-ring-label { position: absolute; bottom: calc(var(--ring) + 6px); left: 50%; transform: translateX(-50%);
+                         padding: 2px 6px; border-radius: 4px; background: rgb(11 21 48 / 0.75); color: var(--paper);
+                         font-size: 0.875rem; white-space: nowrap; }
 .duel-side figcaption { margin-top: 8px; }
 .duel-side strong { display: block; color: var(--paper); font-size: 1.25rem; }
 .duel-count { min-inline-size: 0; text-align: center; }
@@ -195,7 +202,8 @@ main { overflow-anchor: none; }
 .duel-row-caption { margin: 8px 0 0; color: var(--paper); font-size: 0.9rem; }
 .duel-ratio { margin: 16px 0 0; color: var(--paper); font-size: 1.5rem; text-align: center; }
 .duel-ratio strong { font-size: 2.25rem; font-variant-numeric: tabular-nums; }
-.duel-scale-note { max-width: 520px; margin: 8px auto 0; color: var(--muted); font-size: 0.9rem; text-align: center; }
+.duel-scale-note { max-width: 520px; margin: 12px auto 0; padding: 8px 12px; border: 1px solid var(--muted); border-radius: 8px;
+                   color: var(--paper); font-size: 1rem; text-align: center; }
 #duel-error { color: #ffd3c6; }
 
 .planet-quiz { margin-bottom: 24px; padding: 20px; border: 1px solid #536694; border-radius: 12px; background: #13204a; }
