@@ -262,3 +262,30 @@ def test_plain_get_and_smoke_routes(client):
     assert "Next</a>" in response.text
     assert client.get("/healthz").status_code == 200
     assert client.get("/convert?value=1&src=km&dst=mi").status_code == 200
+
+
+def test_zero_score_final_answer_focuses_play_again(client):
+    start = "/?round=3&score=0"
+    answer = start + "&choice=neptune"
+    step = {"region": "planet-quiz", "fields": [["round", "3"], ["score", "0"]],
+            "choice": "neptune", "focus": 'button[name="choice"][value="neptune"]'}
+    log, = run(client, start, [step], [answer])
+    assert log["tag"] == "A", log
+    assert log["text"] == "Play again"
+    assert log["options"] == {"preventScroll": True}
+    assert log["scrollDelta"] == pytest.approx(-75)
+    assert "You chose Neptune" in log["status"]
+
+
+def test_unfocused_quiz_answer_preserves_focus_in_another_region(client):
+    duel = "/?left=mars&right=earth"
+    answer = duel + "&round=1&choice=earth"
+    steps = [
+        {"region": "planet-duel", "fields": [["left", "mars"], ["right", "earth"]],
+         "focus": "#duel-left-mars"},
+        {"region": "planet-quiz", "fields": [["round", "1"]], "choice": "earth"},
+    ]
+    first, second = run(client, "/", steps, [duel, answer])
+    assert first["attrs"]["id"] == second["attrs"]["id"] == "duel-left-mars"
+    assert second["tag"] == "INPUT"
+    assert "You chose Earth" in second["status"]
