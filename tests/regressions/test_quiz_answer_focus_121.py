@@ -740,3 +740,43 @@ def test_continuation_focus_preserves_live_status_semantics(client, round_, choi
             assert page.evaluate("window.scrollY") == before
         finally:
             browser.close()
+
+
+@pytest.mark.parametrize("round_,choice,label", [(1, "earth", "Next"), (3, "neptune", "Play again")])
+def test_keyboard_can_tab_onward_after_answer_focus(client, round_, choice, label):
+    """Answer focus must also place the native keyboard navigation point on the link."""
+    sync_api = pytest.importorskip("playwright.sync_api")
+    base = "http://testserver"
+
+    def serve(route):
+        response = client.get(route.request.url[len(base):])
+        body = SCRIPT.read_bytes() if route.request.url == base + "/static/arcade.js" else response.content
+        route.fulfill(status=response.status_code, body=body,
+                      content_type=response.headers.get("content-type"))
+
+    with sync_api.sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        try:
+            page = browser.new_page(viewport={"width": 1000, "height": 800})
+            page.route("**/*", serve)
+            page.goto(f"{base}/?round={round_}&score=0")
+            answer = page.locator(f'.planet-quiz button[value="{choice}"]')
+            answer.focus()
+            before = page.evaluate("window.scrollY")
+            answer.press("Enter")
+            status = page.locator('.planet-quiz [role="status"]')
+            status.wait_for()
+            continuation = page.get_by_role("link", name=label, exact=True)
+            assert continuation.evaluate("el => el === document.activeElement")
+            page.evaluate("() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))")
+            assert page.evaluate("window.scrollY") == before
+            result = status.inner_text()
+            page.keyboard.press("Tab")
+            assert page.evaluate("document.activeElement !== document.body")
+            assert not continuation.evaluate("el => el === document.activeElement")
+            page.keyboard.press("Shift+Tab")
+            assert continuation.evaluate("el => el === document.activeElement")
+            assert continuation.evaluate("el => el.matches(':focus-visible')")
+            assert status.inner_text() == result
+        finally:
+            browser.close()
