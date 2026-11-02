@@ -1307,3 +1307,55 @@ def test_quiz_answer_handoff_requires_focus_owned_by_quiz(client, round_, focuse
         assert result["attrs"].get("aria-description") == " ".join(result["status"].split())
     else:
         assert result["tag"] == "BODY", result
+
+
+@pytest.mark.parametrize("round_,label", [(1, "Next"), (3, "Play again")])
+def test_native_answer_handoff_requests_focus_without_scrolling(client, round_, label):
+    """Observe the real focus call as well as its keyboard and accessibility effects."""
+    sync_api = pytest.importorskip("playwright.sync_api")
+    base = "http://testserver"
+
+    def serve(route):
+        response = client.get(route.request.url[len(base):])
+        body = SCRIPT.read_bytes() if route.request.url == base + "/static/arcade.js" else response.content
+        route.fulfill(status=response.status_code, body=body,
+                      content_type=response.headers.get("content-type"))
+
+    with sync_api.sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        try:
+            page = browser.new_page(viewport={"width": 1000, "height": 800})
+            page.route("**/*", serve)
+            page.goto(f"{base}/?round={round_}")
+            answer = page.locator('.planet-quiz button[name="choice"]').first
+            answer.focus()
+            before = page.evaluate("window.scrollY")
+            page.evaluate("""() => {
+                window.answerFocusCalls = [];
+                const focus = HTMLElement.prototype.focus;
+                HTMLElement.prototype.focus = function(options) {
+                    window.answerFocusCalls.push({
+                        continuation: this.matches('.planet-quiz a.quiz-next[href]'),
+                        preventScroll: options?.preventScroll === true
+                    });
+                    return focus.call(this, options);
+                };
+            }""")
+            answer.press("Enter")
+            status = page.locator('.planet-quiz [role="status"]')
+            status.wait_for()
+            continuation = page.get_by_role("link", name=label, exact=True)
+            assert continuation.evaluate("el => el === document.activeElement")
+            calls = page.evaluate("window.answerFocusCalls")
+            assert calls and all(call["continuation"] and call["preventScroll"] for call in calls)
+            assert continuation.evaluate("el => el.matches(':focus-visible')")
+            page.evaluate("() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))")
+            assert page.evaluate("window.scrollY") == before
+            session = page.context.new_cdp_session(page)
+            tree = session.send("Accessibility.getFullAXTree")["nodes"]
+            link = next(n for n in tree if n.get("role", {}).get("value") == "link"
+                        and n.get("name", {}).get("value") == label)
+            assert link["description"]["value"] == " ".join(status.inner_text().split())
+            assert any(n.get("role", {}).get("value") == "status" and not n["ignored"] for n in tree)
+        finally:
+            browser.close()
