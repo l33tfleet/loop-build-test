@@ -1217,3 +1217,26 @@ def test_rotated_quiz_without_score_restores_answer_focus(client, round_):
     assert result["scrollDelta"] == pytest.approx(-75)
     assert f"You chose {choice.title()}" in result["status"]
     assert result["attrs"].get("aria-description") == " ".join(result["status"].split())
+
+
+@pytest.mark.parametrize("round_,choice,label", [(1, "earth", "Next"), (3, "neptune", "Play again")])
+def test_answer_focus_uses_rendered_continuation_after_score_normalization(client, round_, choice, label):
+    """An edited score in a bookmarked URL must not break the answer focus handoff."""
+    start = f"/?round={round_}&score=invalid"
+    quiz = next(r for r in Regions(client.get(start).text).regions if r["name"] == "planet-quiz")
+    # Submit the server-rendered hidden fields, just as the plain GET form would.
+    fields = [[n["attrs"]["name"], n["attrs"]["value"]] for n in quiz["nodes"]
+              if n["tag"] == "input" and n["attrs"].get("type") == "hidden"]
+    answer = "/?" + "&".join(f"{name}={value}" for name, value in fields) + f"&choice={choice}"
+    step = {"region": "planet-quiz", "fields": fields, "choice": choice,
+            "focus": f'button[name="choice"][value="{choice}"]'}
+    result, = run(client, start, [step], [answer])
+    rendered = next(r for r in Regions(client.get(answer).text).regions if r["name"] == "planet-quiz")
+    continuation = next(n for n in rendered["nodes"] if n["attrs"].get("class") == "quiz-next")
+    assert result["tag"] == "A", result
+    assert result["text"] == label
+    assert result["attrs"]["href"] == continuation["attrs"]["href"]
+    assert result["options"] == {"preventScroll": True}
+    assert result["scrollDelta"] == pytest.approx(-75)
+    assert f"You chose {choice.title()}" in result["status"]
+    assert result["attrs"].get("aria-description") == " ".join(result["status"].split())
