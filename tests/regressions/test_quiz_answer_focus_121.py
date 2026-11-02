@@ -1383,3 +1383,55 @@ def test_disabled_answer_is_replaced_by_enabled_continuation_focus(client, round
     assert result["options"] == {"preventScroll": True}
     assert result["scrollDelta"] == pytest.approx(-75)
     assert f"You chose {choice.title()}" in result["status"]
+
+
+@pytest.mark.parametrize("answered_round,label", [(1, "Next"), (2, "Play again")])
+def test_answer_after_opening_answered_bookmark_keeps_keyboard_focus(client, answered_round, label):
+    """Continue a server-rendered result, then hand the next answer's focus onward."""
+    sync_api = pytest.importorskip("playwright.sync_api")
+    base = "http://testserver"
+
+    def serve(route):
+        response = client.get(route.request.url[len(base):])
+        body = SCRIPT.read_bytes() if route.request.url == base + "/static/arcade.js" else response.content
+        route.fulfill(status=response.status_code, body=body,
+                      content_type=response.headers.get("content-type"))
+
+    start = f"/?round={answered_round}&score=0"
+    quiz = next(r for r in Regions(client.get(start).text).regions if r["name"] == "planet-quiz")
+    choice = next(n["attrs"]["value"] for n in quiz["nodes"]
+                  if n["tag"] == "button" and n["attrs"].get("name") == "choice")
+    with sync_api.sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        try:
+            page = browser.new_page(viewport={"width": 1000, "height": 800})
+            page.route("**/*", serve)
+            page.goto(base + start + "&choice=" + choice)
+            assert page.locator('.planet-quiz button[name="choice"]:disabled').count() == 2
+            next_link = page.get_by_role("link", name="Next", exact=True)
+            next_link.focus()
+            next_link.press("Enter")
+            page.wait_for_function("""round =>
+                document.querySelector('.quiz-round').textContent.includes('Round ' + round)
+                && !document.querySelector('.planet-quiz [role="status"]')
+            """, arg=answered_round + 1)
+            answer = page.locator('.planet-quiz button[name="choice"]').first
+            answer.focus()
+            before = page.evaluate("window.scrollY")
+            selected = answer.get_attribute("value")
+            answer.press("Enter")
+            status = page.locator('.planet-quiz [role="status"]')
+            status.wait_for()
+            continuation = page.get_by_role("link", name=label, exact=True)
+            assert continuation.evaluate("el => el === document.activeElement")
+            assert continuation.evaluate("el => el.matches(':focus-visible')")
+            page.evaluate("() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))")
+            assert page.evaluate("window.scrollY") == before
+            assert f"You chose {selected.title()}" in status.inner_text()
+            tree = page.context.new_cdp_session(page).send("Accessibility.getFullAXTree")["nodes"]
+            link = next(n for n in tree if n.get("role", {}).get("value") == "link"
+                        and n.get("name", {}).get("value") == label)
+            assert link["description"]["value"] == " ".join(status.inner_text().split())
+            assert any(n.get("role", {}).get("value") == "status" and not n["ignored"] for n in tree)
+        finally:
+            browser.close()
