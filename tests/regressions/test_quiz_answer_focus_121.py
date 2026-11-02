@@ -1263,3 +1263,21 @@ def test_answer_from_default_round_in_rotated_game_restores_focus(client, set_):
         assert result["options"] == {"preventScroll": True}
         assert result["scrollDelta"] == pytest.approx(-75)
         assert f"You chose {choice.title()}" in result["status"]
+
+
+@pytest.mark.parametrize("choice", ["earth", "jupiter"])
+def test_default_home_quiz_answer_restores_focus(client, choice):
+    """The default home page needs no quiz query parameters for answer focus restoration."""
+    quiz = next(r for r in Regions(client.get("/").text).regions if r["name"] == "planet-quiz")
+    fields = [[n["attrs"]["name"], n["attrs"]["value"]] for n in quiz["nodes"]
+              if n["tag"] == "input" and n["attrs"].get("type") == "hidden"]
+    answer = "/?" + "&".join(f"{name}={value}" for name, value in fields) + f"&choice={choice}"
+    step = {"region": "planet-quiz", "fields": fields, "choice": choice,
+            "focus": f'button[name="choice"][value="{choice}"]'}
+    result, = run(client, "/", [step], [answer])
+    assert result["tag"] == "A", result
+    assert result["text"] == "Next"
+    assert result["options"] == {"preventScroll": True}
+    assert result["scrollDelta"] == pytest.approx(-75)
+    assert f"You chose {choice.title()}" in result["status"]
+    assert result["attrs"].get("aria-description") == " ".join(result["status"].split())
