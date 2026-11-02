@@ -565,3 +565,10 @@ def test_second_answer_tab_enter_keeps_keyboard_focus(client, round_, label):
             assert page.evaluate("window.scrollY") == before
         finally:
             browser.close()
+
+
+@pytest.mark.parametrize("choice", ["mercury", "mars"])
+@pytest.mark.parametrize("javascript", [True, False], ids=["in-place", "plain-get"])
+def test_middle_round_keyboard_answer_retains_continuation_focus(client, choice, javascript):
+    """The middle round must meet the same native keyboard and status checks as the endpoints."""
+    test_keyboard_answer_in_browser(client, 2, choice, "Next", javascript)
