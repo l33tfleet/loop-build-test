@@ -572,3 +572,48 @@ def test_second_answer_tab_enter_keeps_keyboard_focus(client, round_, label):
 def test_middle_round_keyboard_answer_retains_continuation_focus(client, choice, javascript):
     """The middle round must meet the same native keyboard and status checks as the endpoints."""
     test_keyboard_answer_in_browser(client, 2, choice, "Next", javascript)
+
+
+@pytest.mark.parametrize("set_", [1, 2])
+@pytest.mark.parametrize("round_", [1, 2, 3])
+def test_rotated_set_keyboard_answers_preserve_focus_and_scroll(client, set_, round_):
+    """Rotated questions obey the answer focus rule for either native submit button."""
+    sync_api = pytest.importorskip("playwright.sync_api")
+    base = "http://testserver"
+
+    def serve(route):
+        response = client.get(route.request.url[len(base):])
+        body = SCRIPT.read_bytes() if route.request.url == base + "/static/arcade.js" else response.content
+        route.fulfill(status=response.status_code, body=body,
+                      content_type=response.headers.get("content-type"))
+
+    with sync_api.sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        try:
+            page = browser.new_page(viewport={"width": 1000, "height": 800})
+            page.route("**/*", serve)
+            for index in range(2):
+                page.goto(f"{base}/?set={set_}&round={round_}&score=0")
+                answers = page.locator('.planet-quiz button[name="choice"]')
+                for _ in range(50):
+                    page.keyboard.press("Tab")
+                    if answers.nth(index).evaluate("el => el === document.activeElement"):
+                        break
+                else:
+                    pytest.fail("Tab never reached the quiz answer")
+                choice = answers.nth(index).get_attribute("value")
+                before = page.evaluate("window.scrollY")
+                page.keyboard.press("Enter")
+                status = page.locator('.planet-quiz [role="status"]')
+                status.wait_for()
+                continuation = page.get_by_role(
+                    "link", name="Play again" if round_ == 3 else "Next", exact=True,
+                )
+                assert continuation.evaluate("el => el === document.activeElement")
+                assert continuation.evaluate("el => el.matches(':focus-visible')")
+                assert f"You chose {choice.title()}" in status.inner_text()
+                assert continuation.get_attribute("aria-description") == " ".join(status.inner_text().split())
+                page.evaluate("() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))")
+                assert page.evaluate("window.scrollY") == before
+        finally:
+            browser.close()
