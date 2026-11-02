@@ -61,7 +61,7 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 }
 
 /* Diameter scale: one linear axis, circle diameter = diameter / largest diameter of a shared square track. */
-.diameter-scale { margin: 0 0 32px; padding: 16px; border: 1px solid #24345e; border-radius: 12px; background: #101b40; }
+.diameter-scale { position: relative; margin: 0 0 32px; padding: 16px; border: 1px solid #24345e; border-radius: 12px; background: #101b40; }
 .diameter-scale h2 { margin: 0 0 4px; color: var(--paper); font-size: 1.35rem; }
 .scale-note { margin: 0 0 16px; color: var(--muted); font-size: 0.9rem; }
 /* One note per view, switched by the same :has() as the chart; display: none keeps the other out of screen readers. */
@@ -124,6 +124,23 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
                                                       transform: none; font-size: 0.9rem; grid-column: 1; grid-row: 1;
                                                       flex-wrap: wrap; justify-content: flex-end; min-width: 0;
                                                       padding: 0; background: none; }
+
+/* Zoom box: a zero-height strip as wide as the circle frame, directly under it, so its dashed square (::before)
+   sits on the shared baseline around the four rocky circles (Earth, the widest, is ~8.9% of the frame, centred).
+   It sits above the leader lines (20) and below the planet labels (30); the words go LEFT of the box because the
+   leader labels own the right side from 72%. Nothing in .scale-rows moves. */
+.scale-zoom { position: relative; z-index: 25; display: block; width: min(100%, 440px); height: 0; margin: 0 auto;
+              color: var(--paper); }
+.scale-zoom::before { content: ""; position: absolute; bottom: 0; left: 44%; width: 12%; aspect-ratio: 1;
+                      box-sizing: border-box; border: 1.5px dashed var(--paper); border-radius: 4px;
+                      background: rgb(244 233 210 / 0.08); }
+.scale-zoom-text { position: absolute; right: calc(56% + 8px); bottom: 0; padding: 0 4px; border-radius: 4px;
+                   background: var(--navy); white-space: nowrap; font-size: 0.875rem; line-height: 1.2;
+                   text-shadow: 0 0 3px var(--navy); }
+.scale-zoom:focus-visible { outline: none; }
+.scale-zoom:focus-visible::before { outline: 2px solid var(--paper); outline-offset: 2px; }
+.diameter-scale:has(#scale-view-bars:checked) .scale-zoom,
+#scale-view-bars:checked ~ .scale-zoom { display: none; }
 
 /* Rocky planet inset: the same shared-baseline circles, scaled to Earth so the small planets compare.
    Earth's label sits above its rim, so the frame leaves room for two label lines above it. */
