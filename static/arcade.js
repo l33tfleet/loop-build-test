@@ -14,6 +14,20 @@
   // Find the control that had focus again after its region was replaced.
   function focusMatch(region, focused) {
     if (!focused) return null;
+    if (region.getAttribute("data-region") === "planet-quiz" &&
+        focused.tagName === "BUTTON" && focused.name === "choice") {
+      var result = region.querySelector('.quiz-answer[role="status"]');
+      var next = result && region.querySelector("a.quiz-next[href]");
+      if (next) {
+        // A newly inserted status can be missed when focus moves immediately.
+        next.setAttribute("aria-description", result.textContent.replace(/\s+/g, " ").trim());
+        next.addEventListener("blur", function () {
+          // Restore the server markup so unrelated updates do not replace this result again.
+          next.removeAttribute("aria-description");
+        }, { once: true });
+        return next;
+      }
+    }
     if (focused.id) return region.querySelector("#" + CSS.escape(focused.id));
     var tag = focused.tagName.toLowerCase();
     if (focused.name) {
