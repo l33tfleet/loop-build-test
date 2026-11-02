@@ -1240,3 +1240,26 @@ def test_answer_focus_uses_rendered_continuation_after_score_normalization(clien
     assert result["scrollDelta"] == pytest.approx(-75)
     assert f"You chose {choice.title()}" in result["status"]
     assert result["attrs"].get("aria-description") == " ".join(result["status"].split())
+
+
+@pytest.mark.parametrize("set_", [1, 2])
+def test_answer_from_default_round_in_rotated_game_restores_focus(client, set_):
+    """Use the rendered GET fields when a rotated game's URL omits the round."""
+    start = f"/?set={set_}"
+    quiz = next(r for r in Regions(client.get(start).text).regions if r["name"] == "planet-quiz")
+    fields = [[n["attrs"]["name"], n["attrs"]["value"]] for n in quiz["nodes"]
+              if n["tag"] == "input" and n["attrs"].get("type") == "hidden"]
+    for button in quiz["nodes"]:
+        if button["tag"] != "button" or button["attrs"].get("name") != "choice":
+            continue
+        choice = button["attrs"]["value"]
+        answer = "/?" + "&".join(f"{name}={value}" for name, value in fields) + f"&choice={choice}"
+        step = {"region": "planet-quiz", "fields": fields, "choice": choice,
+                "focus": f'button[name="choice"][value="{choice}"]'}
+        result, = run(client, start, [step], [answer])
+        assert result["tag"] == "A", result
+        assert result["text"] == "Next"
+        assert result["attrs"]["href"]
+        assert result["options"] == {"preventScroll": True}
+        assert result["scrollDelta"] == pytest.approx(-75)
+        assert f"You chose {choice.title()}" in result["status"]
