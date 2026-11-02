@@ -676,3 +676,25 @@ def test_perfect_score_keyboard_result_available_in_browser_accessibility_tree(c
             assert any(n.get("role", {}).get("value") == "status" for n in tree)
         finally:
             browser.close()
+
+
+@pytest.mark.parametrize("score,choice,total", [(0, "neptune", 0), (1, "uranus", 2)])
+def test_nonperfect_final_result_remains_available_after_answer_focus(client, score, choice, total):
+    """Continuation focus must preserve the complete result for non-perfect games too."""
+    start = f"/?round=3&score={score}"
+    answer = start + "&choice=" + choice
+    step = {"region": "planet-quiz", "fields": [["round", "3"], ["score", str(score)]],
+            "choice": choice, "focus": f'button[name="choice"][value="{choice}"]'}
+    log, = run(client, start, [step], [answer])
+    quiz = next(r for r in Regions(client.get(answer).text).regions if r["name"] == "planet-quiz")
+    status = next(n for n in quiz["nodes"] if n["attrs"].get("role") == "status")
+    continuation = next(n for n in quiz["nodes"] if n["attrs"].get("class") == "quiz-next")
+    assert log["tag"] == "A", log
+    assert log["text"] == "Play again"
+    assert log["attrs"]["href"] == continuation["attrs"]["href"]
+    assert log["options"] == {"preventScroll": True}
+    assert log["scrollDelta"] == pytest.approx(-75)
+    assert log["status"] == status["text"]
+    assert f"You got {total} of 3!" in log["status"]
+    assert f"You chose {choice.title()}" in log["status"]
+    assert log["attrs"].get("aria-description") == " ".join(status["text"].split())
