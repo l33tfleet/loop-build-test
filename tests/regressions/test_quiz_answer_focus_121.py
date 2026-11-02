@@ -968,3 +968,46 @@ def test_keyboard_answer_focus_survives_successive_rounds(client):
                     """, arg=round_ + 1)
         finally:
             browser.close()
+
+
+def test_keyboard_answer_focus_after_starting_a_replay(client):
+    """A replayed game's answer must hand focus to its own rendered continuation."""
+    sync_api = pytest.importorskip("playwright.sync_api")
+    base = "http://testserver"
+
+    def serve(route):
+        response = client.get(route.request.url[len(base):])
+        body = SCRIPT.read_bytes() if route.request.url == base + "/static/arcade.js" else response.content
+        route.fulfill(status=response.status_code, body=body,
+                      content_type=response.headers.get("content-type"))
+
+    with sync_api.sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        try:
+            page = browser.new_page(viewport={"width": 1000, "height": 800})
+            page.route("**/*", serve)
+            page.goto(base + "/?round=3&score=0&choice=neptune")
+            replay = page.get_by_role("link", name="Play again", exact=True)
+            replay.focus()
+            replay.press("Enter")
+            page.wait_for_function("""() =>
+                document.querySelector('.quiz-round').textContent.includes('Round 1')
+                && !document.querySelector('.planet-quiz [role="status"]')
+            """)
+            answer = page.locator('.planet-quiz button[name="choice"]').first
+            choice = answer.inner_text()
+            answer.focus()
+            before = page.evaluate("window.scrollY")
+            answer.press("Enter")
+            status = page.locator('.planet-quiz [role="status"]')
+            status.wait_for()
+            continuation = page.locator('.planet-quiz a.quiz-next[href]')
+            assert continuation.inner_text() == "Next"
+            assert continuation.evaluate("el => el === document.activeElement")
+            assert continuation.evaluate("el => el.matches(':focus-visible')")
+            page.evaluate("() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))")
+            assert page.evaluate("window.scrollY") == before
+            assert f"You chose {choice}" in status.inner_text()
+            assert continuation.get_attribute("aria-description") == " ".join(status.inner_text().split())
+        finally:
+            browser.close()
