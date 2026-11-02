@@ -1359,3 +1359,27 @@ def test_native_answer_handoff_requests_focus_without_scrolling(client, round_, 
             assert any(n.get("role", {}).get("value") == "status" and not n["ignored"] for n in tree)
         finally:
             browser.close()
+
+
+@pytest.mark.parametrize("round_,choice,label", [(1, "earth", "Next"), (3, "neptune", "Play again")])
+def test_disabled_answer_is_replaced_by_enabled_continuation_focus(client, round_, choice, label):
+    """The answered button remains disabled; focus must move to the enabled continuation."""
+    start = f"/?round={round_}"
+    quiz = next(r for r in Regions(client.get(start).text).regions if r["name"] == "planet-quiz")
+    fields = [[n["attrs"]["name"], n["attrs"]["value"]] for n in quiz["nodes"]
+              if n["tag"] == "input" and n["attrs"].get("type") == "hidden"]
+    answer = "/?" + "&".join(f"{name}={value}" for name, value in fields) + f"&choice={choice}"
+    refreshed = next(r for r in Regions(client.get(answer).text).regions if r["name"] == "planet-quiz")
+    buttons = [n for n in refreshed["nodes"] if n["tag"] == "button" and n["attrs"].get("name") == "choice"]
+    assert buttons and all("disabled" in n["attrs"] for n in buttons)
+    continuation = next(n for n in refreshed["nodes"] if n["attrs"].get("class") == "quiz-next")
+    step = {"region": "planet-quiz", "fields": fields, "choice": choice,
+            "focus": f'button[name="choice"][value="{choice}"]'}
+    result, = run(client, start, [step], [answer])
+    assert result["tag"] == "A", result
+    assert result["text"] == label
+    assert result["attrs"]["href"] == continuation["attrs"]["href"]
+    assert "disabled" not in result["attrs"]
+    assert result["options"] == {"preventScroll": True}
+    assert result["scrollDelta"] == pytest.approx(-75)
+    assert f"You chose {choice.title()}" in result["status"]
