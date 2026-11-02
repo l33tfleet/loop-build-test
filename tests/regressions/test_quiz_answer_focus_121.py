@@ -1479,3 +1479,45 @@ def test_answer_focus_after_keyboard_choice_navigation(client, round_, label, re
             assert link["description"]["value"] == " ".join(status.inner_text().split())
         finally:
             browser.close()
+
+
+def test_keyboard_answer_after_invalid_round_recovery(client):
+    """Recovering an invalid quiz URL still allows keyboard users to answer and continue."""
+    sync_api = pytest.importorskip("playwright.sync_api")
+    base = "http://testserver"
+
+    def serve(route):
+        response = client.get(route.request.url[len(base):])
+        body = SCRIPT.read_bytes() if route.request.url == base + "/static/arcade.js" else response.content
+        route.fulfill(status=response.status_code, body=body,
+                      content_type=response.headers.get("content-type"))
+
+    with sync_api.sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        try:
+            page = browser.new_page(viewport={"width": 1000, "height": 800})
+            page.route("**/*", serve)
+            page.goto(base + "/?round=invalid")
+            restart = page.get_by_role("link", name="Start at round 1", exact=True)
+            restart.focus()
+            restart.press("Enter")
+            answer = page.locator('.planet-quiz button[name="choice"][value="earth"]')
+            answer.wait_for()
+            answer.focus()
+            before = page.evaluate("window.scrollY")
+            answer.press("Enter")
+            status = page.locator('.planet-quiz [role="status"]')
+            status.wait_for()
+            continuation = page.get_by_role("link", name="Next", exact=True)
+            assert continuation.evaluate("el => el === document.activeElement")
+            assert continuation.evaluate("el => el.matches(':focus-visible')")
+            page.evaluate("() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))")
+            assert page.evaluate("window.scrollY") == before
+            assert "You chose Earth" in status.inner_text()
+            tree = page.context.new_cdp_session(page).send("Accessibility.getFullAXTree")["nodes"]
+            assert any(n.get("role", {}).get("value") == "status" and not n["ignored"] for n in tree)
+            link = next(n for n in tree if n.get("role", {}).get("value") == "link"
+                        and n.get("name", {}).get("value") == "Next")
+            assert link["description"]["value"] == " ".join(status.inner_text().split())
+        finally:
+            browser.close()
