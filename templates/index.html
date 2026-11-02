@@ -24,7 +24,8 @@
   </nav>
   <main>
 {% for section in sections %}{% include section %}
-{% endfor %}    <p class="source">Data: <a href="{{ source.url }}" rel="noopener">{{ source.name }}</a>, snapshot {{ source.retrieved }}.</p>
+{% endfor %}    <p id="arcade-status" class="visually-hidden" role="status" aria-live="polite"></p>
+    <p class="source">Data: <a href="{{ source.url }}" rel="noopener">{{ source.name }}</a>, snapshot {{ source.retrieved }}.</p>
   </main>
 </body>
 </html>

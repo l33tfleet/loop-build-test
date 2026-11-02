@@ -11,8 +11,15 @@
     return document.querySelector('[data-region="' + name + '"]');
   }
 
+  var FOCUSABLE = "button, a[href], input, select, textarea";
+
+  function collapse(text) {
+    return text.replace(/\s+/g, " ").trim();
+  }
+
   // Find the control that had focus again after its region was replaced.
-  function focusMatch(region, focused) {
+  // `index` is its position among the old region's focusable controls, taken before the swap.
+  function focusMatch(region, focused, index) {
     if (!focused) return null;
     if (region.getAttribute("data-region") === "planet-quiz" &&
         focused.tagName === "BUTTON" && focused.name === "choice") {
@@ -35,7 +42,31 @@
       var match = region.querySelector(selector + '[value="' + CSS.escape(focused.value) + '"]');
       return match || region.querySelector(selector);
     }
-    return region.querySelector("button, a[href], input, select");
+    // No id or name (e.g. the duel's Compare button): same tag and text, else the same position.
+    var text = collapse(focused.textContent);
+    var same = Array.prototype.find.call(region.querySelectorAll(tag), function (node) {
+      return collapse(node.textContent) === text;
+    });
+    return same || (index >= 0 && region.querySelectorAll(FOCUSABLE)[index]) || null;
+  }
+
+  // Copy the section's result into the page's one persistent status, so screen readers announce it.
+  function announce(region) {
+    var status = document.querySelector("#arcade-status");
+    if (!status) return;
+    var result = region.querySelector(".duel-ratio, .birthday-results");
+    var text = "";
+    if (result && result.matches("ul")) {
+      var label = result.getAttribute("aria-label");
+      text = (label ? label + ": " : "") + Array.prototype.map.call(result.querySelectorAll("li"), function (item) {
+        return collapse(item.textContent);
+      }).join(", ");
+    } else if (result) {
+      text = collapse(result.textContent);
+    }
+    // Clear first so an identical result is announced again.
+    status.textContent = "";
+    status.textContent = text;
   }
 
   // Only the latest tap or back/forward may change the page; slower earlier responses are dropped.
@@ -54,6 +85,11 @@
       return;
     }
     if (ticket !== latest) return;
+    // The old region is detached after the swap, so note the control's position now.
+    var index = -1;
+    if (focused && !focused.id && !focused.name) {
+      index = Array.prototype.indexOf.call(origin.querySelectorAll(FOCUSABLE), focused);
+    }
     if (!doc.querySelector('[data-region="' + name + '"]')) {
       window.location.assign(url);
       return;
@@ -73,8 +109,9 @@
     // Undo only the shift the swap caused, so the tapped section stays put even if sections above changed height.
     var current = sameRegion(name);
     window.scrollBy(0, current.getBoundingClientRect().top - before);
+    announce(current);
     if (focused && !document.contains(focused)) {
-      var target = focusMatch(current, focused);
+      var target = focusMatch(current, focused, index);
       if (target) target.focus({ preventScroll: true });
     }
   }
