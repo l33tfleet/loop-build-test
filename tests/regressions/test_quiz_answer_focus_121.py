@@ -1196,3 +1196,24 @@ def test_keyboard_answer_after_browser_back(client, round_, label):
             assert link["description"]["value"] == " ".join(status.inner_text().split())
         finally:
             browser.close()
+
+
+
+@pytest.mark.parametrize("round_", [1, 2, 3])
+def test_rotated_quiz_without_score_restores_answer_focus(client, round_):
+    """A bookmarked rotated round needs no score parameter for the focus handoff."""
+    start = f"/?set=1&round={round_}"
+    quiz = next(r for r in Regions(client.get(start).text).regions if r["name"] == "planet-quiz")
+    choice = next(n["attrs"]["value"] for n in quiz["nodes"]
+                  if n["tag"] == "button" and n["attrs"].get("name") == "choice")
+    answer = start + f"&choice={choice}"
+    step = {"region": "planet-quiz", "fields": [["set", "1"], ["round", str(round_)]],
+            "choice": choice, "focus": f'button[name="choice"][value="{choice}"]'}
+    result, = run(client, start, [step], [answer])
+    assert result["tag"] == "A", result
+    assert result["text"] == ("Play again" if round_ == 3 else "Next")
+    assert result["attrs"]["href"]
+    assert result["options"] == {"preventScroll": True}
+    assert result["scrollDelta"] == pytest.approx(-75)
+    assert f"You chose {choice.title()}" in result["status"]
+    assert result["attrs"].get("aria-description") == " ".join(result["status"].split())
