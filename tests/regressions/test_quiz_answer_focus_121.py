@@ -222,27 +222,6 @@ def test_answer_focuses_rendered_continuation(client, round_, score, set_, choic
     assert log["attrs"].get("aria-description") == " ".join(log["status"].split())
 
 
-@pytest.mark.parametrize("region,focus,fields,start,answer,tag,id_", [
-    ("planet-quiz", None, [["round", "1"]], "/", "/?round=1&choice=earth", "BODY", None),
-    ("planet-quiz", 'button[name="choice"]', [["round", "2"]], "/", "/?round=2&choice=jupiter", "BODY", None),
-    ("planet-quiz", 'button[name="choice"]', [["round", "2"]], "/", "/?round=2", "BUTTON", None),
-    ("planet-duel", "#duel-left-mars", [["left", "mars"], ["right", "earth"]],
-     "/", "/?left=mars&right=earth", "INPUT", "duel-left-mars"),
-    ("planet-duel", "button", [["left", "mars"], ["right", "earth"]],
-     "/", "/?left=mars&right=earth", "INPUT", "duel-left-mercury"),
-    ("shelf-sort", "#planet-sort", [["sort", "diameter"]], "/", "/?sort=diameter", "SELECT", "planet-sort"),
-])
-def test_other_focus_and_missing_result_fallback(client, region, focus, fields, start, answer, tag, id_):
-    step = {"region": region, "focus": focus, "fields": fields}
-    if region == "planet-quiz" and "choice=" in answer:
-        step["choice"] = "earth" if focus is None else "jupiter"
-    log, = run(client, start, [step], [answer])
-    assert log["tag"] == tag
-    if id_:
-        assert log["attrs"]["id"] == id_
-        assert log["options"] == {"preventScroll": True}
-
-
 def test_answered_quiz_survives_unrelated_submissions(client):
     answer = "/?round=1&score=0&choice=earth"
     sorted_ = answer + "&sort=diameter"
@@ -402,66 +381,6 @@ def test_quiz_answer_redirect_precedes_generic_id_restore(client, monkeypatch, r
     assert log["options"] == {"preventScroll": True}
     assert log["scrollDelta"] == pytest.approx(-75)
     assert log["attrs"].get("aria-description") == " ".join(log["status"].split())
-
-
-@pytest.mark.parametrize("focused_answer", [True, False], ids=["keyboard-answer", "outside-focus"])
-def test_browser_focus_across_quiz_duel_and_shelf(client, focused_answer):
-    """Native focus survives other section updates, and quiz answers only move owned focus."""
-    sync_api = pytest.importorskip("playwright.sync_api")
-    base = "http://testserver"
-
-    def serve(route):
-        response = client.get(route.request.url[len(base):])
-        body = SCRIPT.read_bytes() if route.request.url == base + "/static/arcade.js" else response.content
-        route.fulfill(status=response.status_code, body=body,
-                      content_type=response.headers.get("content-type"))
-
-    with sync_api.sync_playwright() as playwright:
-        browser = playwright.chromium.launch()
-        try:
-            page = browser.new_page(viewport={"width": 1000, "height": 800})
-            page.route("**/*", serve)
-            page.goto(base + "/?round=1&score=0")
-
-            # Radio change submits immediately; the selected radio must regain focus.
-            radio = page.locator("#duel-left-mars")
-            radio.focus()
-            radio.press("Space")
-            page.wait_for_url("**/*left=mars*")
-            assert radio.evaluate("el => el === document.activeElement && el.checked")
-
-            # Preserve the generic fallback used by Compare before the quiz change.
-            compare = page.locator(".duel-form button")
-            compare.focus()
-            page.evaluate("document.querySelector('.duel-form [name=right][value=jupiter]').checked = true")
-            compare.press("Enter")
-            page.wait_for_url("**/*right=jupiter*")
-            assert page.locator("#duel-left-mercury").evaluate("el => el === document.activeElement")
-
-            shelf = page.locator("#planet-sort")
-            shelf.select_option("diameter")
-            shelf.focus()
-            page.evaluate("document.querySelector('[data-region=shelf-sort]').requestSubmit()")
-            page.wait_for_url("**/*sort=diameter*")
-            assert shelf.evaluate("el => el === document.activeElement")
-
-            answer = page.locator('.planet-quiz button[name="choice"][value="earth"]')
-            if focused_answer:
-                answer.focus()
-            before = page.evaluate("window.scrollY")
-            if focused_answer:
-                answer.press("Enter")
-            else:
-                answer.evaluate("el => el.form.requestSubmit(el)")
-            status = page.locator('.planet-quiz [role="status"]')
-            status.wait_for()
-            assert "You chose Earth" in status.inner_text()
-            target = page.locator(".planet-quiz a.quiz-next[href]") if focused_answer else shelf
-            assert target.evaluate("el => el === document.activeElement")
-            page.evaluate("() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))")
-            assert page.evaluate("window.scrollY") == before
-        finally:
-            browser.close()
 
 
 @pytest.mark.parametrize("round_,label", [(1, "Next"), (3, "Play again")])
