@@ -1435,3 +1435,47 @@ def test_answer_after_opening_answered_bookmark_keeps_keyboard_focus(client, ans
             assert any(n.get("role", {}).get("value") == "status" and not n["ignored"] for n in tree)
         finally:
             browser.close()
+
+
+@pytest.mark.parametrize("round_,label", [(1, "Next"), (3, "Play again")])
+@pytest.mark.parametrize("reverse", [False, True], ids=["tab", "shift-tab"])
+def test_answer_focus_after_keyboard_choice_navigation(client, round_, label, reverse):
+    """Moving between either answer by keyboard still hands focus to the continuation."""
+    sync_api = pytest.importorskip("playwright.sync_api")
+    base = "http://testserver"
+
+    def serve(route):
+        response = client.get(route.request.url[len(base):])
+        body = SCRIPT.read_bytes() if route.request.url == base + "/static/arcade.js" else response.content
+        route.fulfill(status=response.status_code, body=body,
+                      content_type=response.headers.get("content-type"))
+
+    with sync_api.sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        try:
+            page = browser.new_page(viewport={"width": 1000, "height": 800})
+            page.route("**/*", serve)
+            page.goto(f"{base}/?round={round_}")
+            answers = page.locator('.planet-quiz button[name="choice"]')
+            answers.nth(1 if reverse else 0).focus()
+            page.keyboard.press("Shift+Tab" if reverse else "Tab")
+            selected = answers.nth(0 if reverse else 1)
+            assert selected.evaluate("el => el === document.activeElement")
+            choice = selected.get_attribute("value")
+            before = page.evaluate("window.scrollY")
+            page.keyboard.press("Enter")
+            status = page.locator('.planet-quiz [role="status"]')
+            status.wait_for()
+            continuation = page.get_by_role("link", name=label, exact=True)
+            assert continuation.evaluate("el => el === document.activeElement")
+            assert continuation.evaluate("el => el.matches(':focus-visible')")
+            page.evaluate("() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))")
+            assert page.evaluate("window.scrollY") == before
+            assert f"You chose {choice.title()}" in status.inner_text()
+            tree = page.context.new_cdp_session(page).send("Accessibility.getFullAXTree")["nodes"]
+            assert any(n.get("role", {}).get("value") == "status" and not n["ignored"] for n in tree)
+            link = next(n for n in tree if n.get("role", {}).get("value") == "link"
+                        and n.get("name", {}).get("value") == label)
+            assert link["description"]["value"] == " ".join(status.inner_text().split())
+        finally:
+            browser.close()
