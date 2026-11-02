@@ -1011,3 +1011,20 @@ def test_keyboard_answer_focus_after_starting_a_replay(client):
             assert continuation.get_attribute("aria-description") == " ".join(status.inner_text().split())
         finally:
             browser.close()
+
+
+@pytest.mark.parametrize("round_,choice,label", [(1, "earth", "Next"), (3, "neptune", "Play again")])
+def test_answer_focus_with_plain_round_get_form(client, round_, choice, label):
+    """The minimal GET answer URL from the evidence also restores keyboard focus."""
+    start = f"/?round={round_}"
+    answer = start + f"&choice={choice}"
+    step = {"region": "planet-quiz", "fields": [["round", str(round_)]],
+            "choice": choice, "focus": f'button[name="choice"][value="{choice}"]'}
+    log, = run(client, start, [step], [answer])
+    assert log["tag"] == "A", log
+    assert log["text"] == label
+    assert log["attrs"]["href"]
+    assert log["options"] == {"preventScroll": True}
+    assert log["scrollDelta"] == pytest.approx(-75)
+    assert f"You chose {choice.title()}" in log["status"]
+    assert log["attrs"].get("aria-description") == " ".join(log["status"].split())
