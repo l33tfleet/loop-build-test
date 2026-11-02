@@ -926,3 +926,45 @@ def test_answer_after_duel_update_restores_only_quiz_owned_focus(client, round_,
     assert result["options"] == {"preventScroll": True}
     assert result["scrollDelta"] == pytest.approx(-75)
     assert f"You chose {choice.title()}" in result["status"]
+
+
+def test_keyboard_answer_focus_survives_successive_rounds(client):
+    """Each answer in one game restores focus, including the final replay handoff."""
+    sync_api = pytest.importorskip("playwright.sync_api")
+    base = "http://testserver"
+
+    def serve(route):
+        response = client.get(route.request.url[len(base):])
+        body = SCRIPT.read_bytes() if route.request.url == base + "/static/arcade.js" else response.content
+        route.fulfill(status=response.status_code, body=body,
+                      content_type=response.headers.get("content-type"))
+
+    with sync_api.sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        try:
+            page = browser.new_page(viewport={"width": 1000, "height": 800})
+            page.route("**/*", serve)
+            page.goto(base + "/?round=1")
+            for round_ in range(1, 4):
+                answer = page.locator('.planet-quiz button[name="choice"]').first
+                answer.focus()
+                before = page.evaluate("window.scrollY")
+                answer.press("Enter")
+                status = page.locator('.planet-quiz [role="status"]')
+                status.wait_for()
+                continuation = page.locator('.planet-quiz a.quiz-next[href]')
+                assert continuation.inner_text() == ("Next" if round_ < 3 else "Play again")
+                assert continuation.evaluate("el => el === document.activeElement")
+                assert continuation.evaluate("el => el.matches(':focus-visible')")
+                page.evaluate("() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))")
+                assert page.evaluate("window.scrollY") == before
+                assert "You chose" in status.inner_text()
+                assert continuation.get_attribute("aria-description") == " ".join(status.inner_text().split())
+                if round_ < 3:
+                    continuation.press("Enter")
+                    page.wait_for_function("""round =>
+                        document.querySelector('.quiz-round').textContent.includes('Round ' + round)
+                        && !document.querySelector('.planet-quiz [role="status"]')
+                    """, arg=round_ + 1)
+        finally:
+            browser.close()
