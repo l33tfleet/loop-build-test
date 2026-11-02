@@ -698,3 +698,45 @@ def test_nonperfect_final_result_remains_available_after_answer_focus(client, sc
     assert f"You got {total} of 3!" in log["status"]
     assert f"You chose {choice.title()}" in log["status"]
     assert log["attrs"].get("aria-description") == " ".join(status["text"].split())
+
+
+@pytest.mark.parametrize("round_,choice,label", [(1, "earth", "Next"), (3, "uranus", "Play again")])
+def test_continuation_focus_preserves_live_status_semantics(client, round_, choice, label):
+    """Answer focus must leave the result exposed as a polite, atomic live region."""
+    sync_api = pytest.importorskip("playwright.sync_api")
+    base = "http://testserver"
+
+    def serve(route):
+        response = client.get(route.request.url[len(base):])
+        body = SCRIPT.read_bytes() if route.request.url == base + "/static/arcade.js" else response.content
+        route.fulfill(status=response.status_code, body=body,
+                      content_type=response.headers.get("content-type"))
+
+    with sync_api.sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        try:
+            page = browser.new_page(viewport={"width": 1000, "height": 800})
+            page.route("**/*", serve)
+            page.goto(f"{base}/?round={round_}&score=0")
+            answer = page.locator(f'.planet-quiz button[value="{choice}"]')
+            answer.focus()
+            before = page.evaluate("window.scrollY")
+            answer.press("Enter")
+            status = page.locator('.planet-quiz [role="status"]')
+            status.wait_for()
+            continuation = page.get_by_role("link", name=label, exact=True)
+            assert continuation.evaluate("el => el === document.activeElement")
+            session = page.context.new_cdp_session(page)
+            tree = session.send("Accessibility.getFullAXTree")["nodes"]
+            live_status = next(n for n in tree if n.get("role", {}).get("value") == "status")
+            properties = {p["name"]: p["value"]["value"] for p in live_status["properties"]}
+            assert properties["live"] == "polite"
+            assert properties["atomic"] is True
+            assert not live_status["ignored"]
+            link = next(n for n in tree if n.get("role", {}).get("value") == "link"
+                        and n.get("name", {}).get("value") == label)
+            assert link["description"]["value"] == " ".join(status.inner_text().split())
+            page.evaluate("() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))")
+            assert page.evaluate("window.scrollY") == before
+        finally:
+            browser.close()
