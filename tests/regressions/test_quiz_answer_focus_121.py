@@ -327,3 +327,53 @@ def test_each_rendered_answer_hands_focus_to_continuation(client, set_, round_):
         assert log["scrollDelta"] == pytest.approx(-75)
         assert "You chose" in log["status"]
         assert log["attrs"].get("aria-description") == " ".join(log["status"].split())
+
+
+@pytest.mark.parametrize("round_,choice,label", [(1, "earth", "Next"), (3, "neptune", "Play again")])
+@pytest.mark.parametrize("javascript", [True, False], ids=["in-place", "plain-get"])
+def test_keyboard_answer_in_browser(client, round_, choice, label, javascript):
+    """Exercise native Enter submission, focus, layout and the accessibility tree offline."""
+    sync_api = pytest.importorskip("playwright.sync_api")
+    base = "http://testserver"
+
+    def serve(route):
+        response = client.get(route.request.url[len(base):])
+        body = SCRIPT.read_bytes() if route.request.url == base + "/static/arcade.js" else response.content
+        route.fulfill(status=response.status_code, body=body,
+                      content_type=response.headers.get("content-type"))
+
+    with sync_api.sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        try:
+            page = browser.new_page(java_script_enabled=javascript, viewport={"width": 1000, "height": 800})
+            page.route("**/*", serve)
+            page.goto(f"{base}/?round={round_}&score=0")
+            answer = page.locator(f'.planet-quiz button[name="choice"][value="{choice}"]')
+            answer.focus()
+            before = page.evaluate("window.scrollY")
+            assert before > 0, "answer must be below the fold to detect a scroll reset"
+            page.evaluate("window.quizDocument = true")
+            answer.press("Enter")
+            status = page.locator('.planet-quiz [role="status"]')
+            status.wait_for()
+            assert f"You chose {choice.title()}" in status.inner_text()
+            continuation = page.locator(".planet-quiz a.quiz-next[href]")
+            assert continuation.inner_text() == label
+            assert f"choice={choice}" in page.url
+            if javascript:
+                assert continuation.evaluate("el => el === document.activeElement")
+                # Allow browser scroll anchoring and subsequent animation frames to settle.
+                page.evaluate("() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))")
+                assert page.evaluate("window.scrollY") == before
+                assert page.evaluate("window.quizDocument") is True
+                # Inspect what assistive technology receives, including the result on focus.
+                session = page.context.new_cdp_session(page)
+                tree = session.send("Accessibility.getFullAXTree")["nodes"]
+                link = next(n for n in tree if n.get("role", {}).get("value") == "link"
+                            and n.get("name", {}).get("value") == label)
+                assert link["description"]["value"] == " ".join(status.inner_text().split())
+                assert any(n.get("role", {}).get("value") == "status" for n in tree)
+            else:
+                assert page.evaluate("window.quizDocument === undefined")
+        finally:
+            browser.close()
