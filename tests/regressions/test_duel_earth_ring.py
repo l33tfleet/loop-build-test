@@ -17,8 +17,10 @@ RATIO = '<p class="duel-ratio" aria-live="polite">'
 PORTRAITS = '<div class="duel-portraits">'
 FRAME = re.compile(r'<span class="duel-frame" aria-hidden="true">(.*?)</span>\s*<figcaption>', re.DOTALL)
 PORTRAIT = re.compile(r'<span class="duel-portrait" data-planet="(\w+)" style="width: ([\d.]+)%"></span>')
-RING = re.compile(r'<span class="duel-earth-ring" style="--ring: ([\d.]+)%"></span>')
 LABEL = '<span class="duel-earth-ring-label">Earth, same scale</span>'
+# The label is nested in the ring so it is placed from the ring's own height, never on top of it.
+RING = re.compile(r'<span class="duel-earth-ring" style="--ring: ([\d.]+)%">' + re.escape(LABEL) + "</span>")
+BASE = "http://arcade.test"
 
 
 def duel(client, **params):
@@ -86,6 +88,8 @@ def test_ring_rule_for_every_pair(client, left, right):
      "Jupiter is <strong>11.2</strong> times as wide as Earth."),
     ("mercury", "mars", "Full circle = Mars, 6,792 km",
      "Mars is <strong>1.39</strong> times as wide as Mercury."),
+    ("saturn", "mercury", "Full circle = Saturn, 120,536 km",
+     "Saturn is <strong>24.7</strong> times as wide as Mercury."),
     ("mercury", "saturn", "Full circle = Saturn, 120,536 km",
      "Saturn is <strong>24.7</strong> times as wide as Mercury."),
     ("earth", "earth", "Full circle = Earth, 12,756 km",
@@ -123,7 +127,7 @@ def test_error_path_has_no_note_or_ring(client):
 
 ZOOM_BLOCK = re.compile(r'\n *<a class="scale-zoom".*?</a>(?=\n)', re.DOTALL)
 COUNT_BLOCK = re.compile(r'\n *\n *<div class="duel-count".*?</div>\n *(?=\n)', re.DOTALL)
-RING_PAIR = re.compile(r'<span class="duel-earth-ring" style="--ring: [\d.]+%"></span>' + re.escape(LABEL))
+RING_PAIR = re.compile(r'<span class="duel-earth-ring" style="--ring: [\d.]+%">' + re.escape(LABEL) + "</span>")
 NOTE_NOW = re.compile(r'<p class="duel-scale-note">Full circle = [A-Z][a-z]+, [\d,]+ km</p>')
 NOTE_BEFORE = ('<p class="duel-scale-note">Drawn to scale for this pair only: '
                "the larger planet always fills the same circle.</p>")
@@ -170,5 +174,48 @@ def test_ring_css_is_dashed_circle_on_the_frame_baseline(client):
         assert decl in ring, (decl, ring)
     label = _rules(css, ".duel-earth-ring-label")
     assert "position: absolute" in label
+    # Placed from the ring it sits in; a var() defined only on another element would void the declaration.
+    assert "bottom: calc(100% + " in label and "var(--ring)" not in label, label
     size = re.findall(r"font-size:\s*([\d.]+)rem", label)
     assert size and float(size[-1]) >= 0.875, size
+
+
+@pytest.mark.parametrize(("left", "right", "wide"), [
+    ("jupiter", "earth", 1280), ("earth", "jupiter", 390), ("saturn", "earth", 1280), ("uranus", "venus", 390),
+])
+def test_ring_and_label_do_not_overlap_in_a_browser(client, left, right, wide):
+    sync_api = pytest.importorskip("playwright.sync_api")
+
+    def serve(route):
+        response = client.get(route.request.url[len(BASE):])
+        route.fulfill(status=response.status_code, body=response.content,
+                      content_type=response.headers.get("content-type"))
+
+    measure = """() => {
+      const rect = (node) => node.getBoundingClientRect().toJSON();
+      const portraits = [...document.querySelectorAll(".duel-portrait")].map(rect);
+      const ring = document.querySelector(".duel-earth-ring");
+      return {
+        ring: rect(ring), label: rect(document.querySelector(".duel-earth-ring-label")),
+        frame: rect(ring.parentElement), big: portraits.reduce((a, b) => (a.width >= b.width ? a : b)),
+        style: getComputedStyle(ring).borderTopStyle, scroll: document.documentElement.scrollWidth,
+      };
+    }"""
+    with sync_api.sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        try:
+            page = browser.new_page(viewport={"width": wide, "height": 900})
+            page.route("**/*", serve)
+            page.goto(f"{BASE}/?left={left}&right={right}")
+            got = page.evaluate(measure)
+        finally:
+            browser.close()
+    ring, label, big = got["ring"], got["label"], got["big"]
+    earth_pct = 100 * EARTH / max(DIAMETERS[left], DIAMETERS[right])
+    assert ring["width"] == pytest.approx(big["width"] * earth_pct / 100, abs=0.6), "ring is Earth at the frame's scale"
+    assert ring["bottom"] == pytest.approx(big["bottom"], abs=0.6), "ring shares the portraits' baseline"
+    assert ring["width"] > 4, "ring is visible"
+    assert got["style"] == "dashed"
+    assert label["bottom"] <= ring["top"], "label sits above the ring, not over it"
+    assert label["left"] >= got["frame"]["left"] - 0.5 and label["right"] <= got["frame"]["right"] + 0.5
+    assert got["scroll"] <= wide

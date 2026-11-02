@@ -28,7 +28,7 @@
         {% for p in duel.sides %}
         <figure class="duel-side">
           <span class="duel-frame" aria-hidden="true"><span class="duel-portrait" data-planet="{{ p.name|lower }}" style="width: {{ p.width_pct }}%"></span>
-            {%- if duel.earth_ring and duel.earth_ring.column == loop.index0 %}<span class="duel-earth-ring" style="--ring: {{ duel.earth_ring.pct }}%"></span><span class="duel-earth-ring-label">Earth, same scale</span>{% endif %}</span>
+            {%- if duel.earth_ring and duel.earth_ring.column == loop.index0 %}<span class="duel-earth-ring" style="--ring: {{ duel.earth_ring.pct }}%"><span class="duel-earth-ring-label">Earth, same scale</span></span>{% endif %}</span>
           <figcaption><strong>{{ p.name }}</strong> <span>{{ "{:,}".format(p.diameter_km) }} km</span></figcaption>
         </figure>
         {% endfor %}
