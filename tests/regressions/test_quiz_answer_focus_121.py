@@ -503,3 +503,24 @@ def test_tab_enter_answer_shows_continuation_focus_ring(client, round_, label):
             assert "You chose" in status.inner_text()
         finally:
             browser.close()
+
+
+@pytest.mark.parametrize("round_,focused,submitted,label", [
+    (1, "earth", "jupiter", "Next"),
+    (3, "uranus", "neptune", "Play again"),
+])
+def test_quiz_continuation_restores_focused_answer_independently_of_submitter(
+    client, round_, focused, submitted, label,
+):
+    """Focus belongs to the removed answer control, regardless of which answer submits."""
+    start = f"/?round={round_}&score=0"
+    answer = start + "&choice=" + submitted
+    step = {"region": "planet-quiz", "fields": [["round", str(round_)], ["score", "0"]],
+            "choice": submitted, "focus": f'button[name="choice"][value="{focused}"]'}
+    log, = run(client, start, [step], [answer])
+    assert log["tag"] == "A", log
+    assert log["text"] == label
+    assert log["options"] == {"preventScroll": True}
+    assert log["scrollDelta"] == pytest.approx(-75)
+    assert f"You chose {submitted.title()}" in log["status"]
+    assert log["attrs"].get("aria-description") == " ".join(log["status"].split())
