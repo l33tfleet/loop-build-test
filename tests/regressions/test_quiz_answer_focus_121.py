@@ -636,3 +636,43 @@ def test_final_answer_keeps_full_status_available_on_continuation_focus(client):
     assert "Perfect score!" in log["status"]
     assert "You got 3 of 3!" in log["status"]
     assert log["attrs"].get("aria-description") == " ".join(status["text"].split())
+
+
+def test_perfect_score_keyboard_result_available_in_browser_accessibility_tree(client):
+    """The full final result must reach AT when Enter moves focus to Play again."""
+    sync_api = pytest.importorskip("playwright.sync_api")
+    base = "http://testserver"
+
+    def serve(route):
+        response = client.get(route.request.url[len(base):])
+        body = SCRIPT.read_bytes() if route.request.url == base + "/static/arcade.js" else response.content
+        route.fulfill(status=response.status_code, body=body,
+                      content_type=response.headers.get("content-type"))
+
+    with sync_api.sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        try:
+            page = browser.new_page(viewport={"width": 1000, "height": 800})
+            page.route("**/*", serve)
+            page.goto(base + "/?round=3&score=2")
+            answer = page.locator('.planet-quiz button[value="uranus"]')
+            answer.focus()
+            before = page.evaluate("window.scrollY")
+            answer.press("Enter")
+            status = page.locator('.planet-quiz [role="status"]')
+            status.wait_for()
+            result = " ".join(status.inner_text().split())
+            assert "Perfect score!" in result and "You got 3 of 3!" in result
+            continuation = page.get_by_role("link", name="Play again", exact=True)
+            assert continuation.evaluate("el => el === document.activeElement")
+            assert continuation.evaluate("el => el.matches(':focus-visible')")
+            page.evaluate("() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))")
+            assert page.evaluate("window.scrollY") == before
+            session = page.context.new_cdp_session(page)
+            tree = session.send("Accessibility.getFullAXTree")["nodes"]
+            link = next(n for n in tree if n.get("role", {}).get("value") == "link"
+                        and n.get("name", {}).get("value") == "Play again")
+            assert link["description"]["value"] == result
+            assert any(n.get("role", {}).get("value") == "status" for n in tree)
+        finally:
+            browser.close()
