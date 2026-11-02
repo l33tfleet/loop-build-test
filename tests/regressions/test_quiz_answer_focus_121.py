@@ -1625,3 +1625,29 @@ def test_answer_handoff_preserves_focus_outside_all_regions(client, round_, labe
                 assert link["description"]["value"] == " ".join(status.inner_text().split())
         finally:
             browser.close()
+
+
+@pytest.mark.parametrize("round_,choice,label", [(1, "earth", "Next"), (3, "neptune", "Play again")])
+def test_answer_handoff_after_both_shelf_and_duel_updates(client, round_, choice, label):
+    """Earlier focus restores in other regions must not interfere with the answer handoff."""
+    sorted_url = "/?sort=diameter"
+    duel_url = sorted_url + "&left=mars&right=earth"
+    answer_url = duel_url + f"&round={round_}&score=0&choice={choice}"
+    steps = [
+        {"region": "shelf-sort", "focus": "#planet-sort", "fields": [["sort", "diameter"]]},
+        {"region": "planet-duel", "focus": "#duel-left-mars",
+         "fields": [["left", "mars"], ["right", "earth"]]},
+        {"region": "planet-quiz", "focus": f'button[name="choice"][value="{choice}"]',
+         "choice": choice, "fields": [["round", str(round_)], ["score", "0"]]},
+    ]
+    # Open the requested round first; only answer submissions are under test here.
+    start = f"/?round={round_}&score=0"
+    responses = [f"{start}&sort=diameter", f"{start}&sort=diameter&left=mars&right=earth", answer_url]
+    shelf, duel, answer = run(client, start, steps, responses)
+    assert shelf["attrs"]["id"] == "planet-sort"
+    assert duel["attrs"]["id"] == "duel-left-mars"
+    assert answer["tag"] == "A"
+    assert answer["text"] == label
+    assert answer["options"] == {"preventScroll": True}
+    assert answer["scrollDelta"] == pytest.approx(-75)
+    assert f"You chose {choice.title()}" in answer["status"]
