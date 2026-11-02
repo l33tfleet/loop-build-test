@@ -826,3 +826,47 @@ def test_keyboard_answer_keeps_scroll_done_while_response_is_pending(client, rou
             assert page.evaluate("window.scrollY") == before_swap
         finally:
             browser.close()
+
+
+@pytest.mark.parametrize("round_,choice,label", [(1, "earth", "Next"), (3, "neptune", "Play again")])
+def test_answer_focus_does_not_scroll_back_to_quiz_after_user_scrolls_away(client, round_, choice, label):
+    """A pending answer must restore focus without bringing an offscreen quiz back into view."""
+    sync_api = pytest.importorskip("playwright.sync_api")
+    base = "http://testserver"
+
+    def serve(route):
+        response = client.get(route.request.url[len(base):])
+        body = SCRIPT.read_bytes() if route.request.url == base + "/static/arcade.js" else response.content
+        route.fulfill(status=response.status_code, body=body,
+                      content_type=response.headers.get("content-type"))
+
+    with sync_api.sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        try:
+            page = browser.new_page(viewport={"width": 1000, "height": 800})
+            page.route("**/*", serve)
+            page.goto(f"{base}/?round={round_}&score=0")
+            page.evaluate("""() => {
+                const fetch = window.fetch.bind(window);
+                window.fetch = (...args) => fetch(...args).then(response => new Promise(resolve => {
+                    window.releaseQuizResponse = () => resolve(response);
+                }));
+            }""")
+            answer = page.locator(f'.planet-quiz button[value="{choice}"]')
+            answer.focus()
+            answer.press("Enter")
+            page.wait_for_function("typeof window.releaseQuizResponse === 'function'")
+            page.evaluate("window.scrollTo(0, 0)")
+            page.evaluate("window.releaseQuizResponse()")
+            status = page.locator('.planet-quiz [role="status"]')
+            status.wait_for()
+            continuation = page.get_by_role("link", name=label, exact=True)
+            assert continuation.evaluate("el => el === document.activeElement")
+            assert continuation.evaluate("el => el.matches(':focus-visible')")
+            page.evaluate("() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))")
+            assert page.evaluate("window.scrollY") == 0
+            assert continuation.bounding_box()["y"] > 800
+            assert f"You chose {choice.title()}" in status.inner_text()
+            assert continuation.get_attribute("aria-description") == " ".join(status.inner_text().split())
+        finally:
+            browser.close()
