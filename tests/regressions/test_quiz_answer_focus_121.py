@@ -1143,3 +1143,56 @@ def test_keyboard_answer_after_quiz_navigation_anchor(client, round_, choice, la
             assert continuation.get_attribute("aria-description") == " ".join(status.inner_text().split())
         finally:
             browser.close()
+
+
+@pytest.mark.parametrize("round_,label", [(1, "Next"), (3, "Play again")])
+def test_keyboard_answer_after_browser_back(client, round_, label):
+    """A restored unanswered round must still hand answer focus to its continuation."""
+    sync_api = pytest.importorskip("playwright.sync_api")
+    base = "http://testserver"
+
+    def serve(route):
+        response = client.get(route.request.url[len(base):])
+        body = SCRIPT.read_bytes() if route.request.url == base + "/static/arcade.js" else response.content
+        route.fulfill(status=response.status_code, body=body,
+                      content_type=response.headers.get("content-type"))
+
+    with sync_api.sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        try:
+            page = browser.new_page(viewport={"width": 1000, "height": 800})
+            page.route("**/*", serve)
+            page.goto(f"{base}/?round={round_}")
+            answer = page.locator('.planet-quiz button[name="choice"]').first
+            answer.press("Enter")
+            page.locator('.planet-quiz [role="status"]').wait_for()
+            # Restore the unanswered round through the script's popstate handler.
+            page.go_back()
+            page.wait_for_function("""() =>
+                !document.querySelector('.planet-quiz [role="status"]') &&
+                !document.querySelector('.planet-quiz button[name="choice"]').disabled
+            """)
+            answer.focus()
+            before = page.evaluate("window.scrollY")
+            choice = answer.get_attribute("value")
+            answer.press("Enter")
+            status = page.locator('.planet-quiz [role="status"]')
+            status.wait_for()
+            continuation = page.get_by_role("link", name=label, exact=True)
+            assert continuation.evaluate("el => el === document.activeElement")
+            assert continuation.evaluate("el => el.matches(':focus-visible')")
+            page.evaluate("() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))")
+            assert page.evaluate("window.scrollY") == before
+            assert f"You chose {choice.title()}" in status.inner_text()
+            session = page.context.new_cdp_session(page)
+            tree = session.send("Accessibility.getFullAXTree")["nodes"]
+            live_status = next(n for n in tree if n.get("role", {}).get("value") == "status")
+            properties = {p["name"]: p["value"]["value"] for p in live_status["properties"]}
+            assert properties["live"] == "polite"
+            assert properties["atomic"] is True
+            assert not live_status["ignored"]
+            link = next(n for n in tree if n.get("role", {}).get("value") == "link"
+                        and n.get("name", {}).get("value") == label)
+            assert link["description"]["value"] == " ".join(status.inner_text().split())
+        finally:
+            browser.close()
