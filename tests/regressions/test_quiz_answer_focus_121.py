@@ -617,3 +617,22 @@ def test_rotated_set_keyboard_answers_preserve_focus_and_scroll(client, set_, ro
                 assert page.evaluate("window.scrollY") == before
         finally:
             browser.close()
+
+
+def test_final_answer_keeps_full_status_available_on_continuation_focus(client):
+    """Moving focus must preserve the final result, including the score, for AT."""
+    start = "/?round=3&score=2"
+    answer = start + "&choice=uranus"
+    step = {"region": "planet-quiz", "fields": [["round", "3"], ["score", "2"]],
+            "choice": "uranus", "focus": 'button[name="choice"][value="uranus"]'}
+    log, = run(client, start, [step], [answer])
+    quiz = next(r for r in Regions(client.get(answer).text).regions if r["name"] == "planet-quiz")
+    status = next(n for n in quiz["nodes"] if n["attrs"].get("role") == "status")
+    assert log["tag"] == "A", log
+    assert log["text"] == "Play again"
+    assert log["options"] == {"preventScroll": True}
+    assert log["scrollDelta"] == pytest.approx(-75)
+    assert log["status"] == status["text"]
+    assert "Perfect score!" in log["status"]
+    assert "You got 3 of 3!" in log["status"]
+    assert log["attrs"].get("aria-description") == " ".join(status["text"].split())
