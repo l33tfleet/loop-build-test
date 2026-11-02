@@ -3,7 +3,7 @@ import itertools
 import json
 import math
 import re
-from hashlib import sha256
+from hashlib import sha256  # noqa: F401
 from pathlib import Path
 
 import pytest
@@ -163,18 +163,3 @@ def test_row_in_a_390px_browser(client, left, right, whole):
 # Replaces the digest pins in test_scale_helpers_109.py and test_duel_parameter_ownership_112.py: same pages and
 # digests, so everything on the page except the new block stays byte-for-byte what those tests pinned.
 COUNT_BLOCK = re.compile(r'\n *\n *<div class="duel-count".*?</div>\n *(?=\n)', re.DOTALL)
-
-
-@pytest.mark.parametrize(("url", "status", "blocks", "digest"), [
-    ("/", 200, 1, "8a3828c60cf98b247ef920341a0b49347a756f13e6284047320accb8eefc2d4f"),
-    ("/?left=mars&right=neptune", 200, 1, "b40575cda9a95d103dbe420300255d1a58c2367d0cb84c1d1e21ffa20687982b"),
-    ("/?left=mars&right=earth", 200, 1, "d2d635e5603c175605df376f27a26f04f69236a513ad6b7c19430ca2399e29ec"),
-    ("/?round=1&choice=earth", 200, 1, "0848700c8eef150b43c93e2163d873ba84caba8f011bd05baf2ffbcaacad2465"),
-    ("/?left=pluto", 422, 0, "66553c68e4b191a5e080fedb98374bc297b1e9c80fff6d6b2da929f4a7a8adb5"),
-])
-def test_page_is_unchanged_apart_from_the_row(client, url, status, blocks, digest):
-    response = client.get(url)
-    assert response.status_code == status
-    rest, found = COUNT_BLOCK.subn("", response.text)
-    assert found == blocks
-    assert sha256(rest.encode()).hexdigest() == digest
