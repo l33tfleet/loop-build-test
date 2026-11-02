@@ -462,3 +462,44 @@ def test_browser_focus_across_quiz_duel_and_shelf(client, focused_answer):
             assert page.evaluate("window.scrollY") == before
         finally:
             browser.close()
+
+
+@pytest.mark.parametrize("round_,label", [(1, "Next"), (3, "Play again")])
+def test_tab_enter_answer_shows_continuation_focus_ring(client, round_, label):
+    """The keyboard path in the evidence must leave a visible continuation focus ring."""
+    sync_api = pytest.importorskip("playwright.sync_api")
+    base = "http://testserver"
+
+    def serve(route):
+        response = client.get(route.request.url[len(base):])
+        body = SCRIPT.read_bytes() if route.request.url == base + "/static/arcade.js" else response.content
+        route.fulfill(status=response.status_code, body=body,
+                      content_type=response.headers.get("content-type"))
+
+    with sync_api.sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        try:
+            page = browser.new_page(viewport={"width": 1000, "height": 800})
+            page.route("**/*", serve)
+            page.goto(f"{base}/?round={round_}")
+            # Reach an answer with native sequential keyboard navigation, without focus().
+            for _ in range(50):
+                page.keyboard.press("Tab")
+                if page.evaluate('document.activeElement.matches(\'.planet-quiz button[name="choice"]\')'):
+                    break
+            else:
+                pytest.fail("Tab never reached a quiz answer")
+            before = page.evaluate("window.scrollY")
+            page.keyboard.press("Enter")
+            status = page.locator('.planet-quiz [role="status"]')
+            status.wait_for()
+            continuation = page.get_by_role("link", name=label, exact=True)
+            assert continuation.evaluate("el => el === document.activeElement")
+            assert continuation.evaluate("el => el.matches(':focus-visible')")
+            assert continuation.evaluate("el => getComputedStyle(el).outlineStyle") != "none"
+            assert float(continuation.evaluate("el => parseFloat(getComputedStyle(el).outlineWidth)")) > 0
+            page.evaluate("() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))")
+            assert page.evaluate("window.scrollY") == before
+            assert "You chose" in status.inner_text()
+        finally:
+            browser.close()
