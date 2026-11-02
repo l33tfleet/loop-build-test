@@ -870,3 +870,29 @@ def test_answer_focus_does_not_scroll_back_to_quiz_after_user_scrolls_away(clien
             assert continuation.get_attribute("aria-description") == " ".join(status.inner_text().split())
         finally:
             browser.close()
+
+
+@pytest.mark.parametrize("focused_answer", [True, False], ids=["answer-focus", "shelf-focus"])
+def test_final_answer_after_shelf_sort_restores_only_quiz_owned_focus(client, focused_answer):
+    """Replay gets focused only when the final answer owned focus before replacement."""
+    start = "/?round=3&score=0"
+    sorted_ = start + "&sort=diameter"
+    answered = "/?sort=diameter&round=3&score=0&choice=neptune"
+    steps = [
+        {"region": "shelf-sort", "focus": "#planet-sort", "fields": [["sort", "diameter"]]},
+        {"region": "planet-quiz", "fields": [["round", "3"], ["score", "0"]],
+         "choice": "neptune", "focus": 'button[value="neptune"]' if focused_answer else None},
+    ]
+    shelf, result = run(client, start, steps, [sorted_, answered])
+    assert shelf["attrs"]["id"] == "planet-sort"
+    if focused_answer:
+        assert result["tag"] == "A", result
+        assert result["text"] == "Play again"
+        assert result["attrs"].get("aria-description") == " ".join(result["status"].split())
+    else:
+        assert result["tag"] == "SELECT"
+        assert result["attrs"]["id"] == "planet-sort"
+    assert result["options"] == {"preventScroll": True}
+    assert result["scrollDelta"] == pytest.approx(-75)
+    assert "You chose Neptune" in result["status"]
+    assert "You got 0 of 3!" in result["status"]
