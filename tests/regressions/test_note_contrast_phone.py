@@ -1,6 +1,7 @@
 """#130: explanatory notes use the body --ink colour (or brighter) and reach 16px on phones."""
 import re
 from html.parser import HTMLParser
+from pathlib import Path
 
 import pytest
 
@@ -122,8 +123,8 @@ def _colour(css, value):
 def test_offline_axe_color_contrast_for_notes(client):
     """axe's color-contrast rule (WCAG AA, 4.5:1 for normal text) for every rendered note.
 
-    axe-core is not installed and tests run offline, so this applies the same check from the
-    stylesheet: each note's text colour against the nearest ancestor panel's solid background.
+    Supplements test_axe_audit_passes (which skips without a browser): applies the same check from
+    the stylesheet, each note's text colour against the nearest ancestor panel's solid background.
     """
     css = _css(client)
     checked = set()
@@ -171,6 +172,45 @@ def _computed(client, width):
         finally:
             browser.close()
     return seen, ink
+
+
+def _axe_source():
+    """axe-core bundled with the locally installed axe-playwright-python package (no CDN)."""
+    package = pytest.importorskip("axe_playwright_python")
+    return (Path(package.__file__).parent / "axe.min.js").read_text()
+
+
+@pytest.mark.parametrize("width", [390, 1280])
+def test_axe_audit_passes(client, width):
+    """Runs real axe-core (WCAG 2 A/AA rules) on every page that shows the notes."""
+    sync_api = pytest.importorskip("playwright.sync_api")
+    axe = _axe_source()
+
+    def serve(route):
+        response = client.get(route.request.url[len(BASE):])
+        route.fulfill(status=response.status_code, body=response.content,
+                      content_type=response.headers.get("content-type"))
+
+    results = {}
+    with sync_api.sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        try:
+            page = browser.new_page(viewport={"width": width, "height": 800})
+            page.route("**/*", serve)
+            for path in PAGES:
+                page.goto(BASE + path)
+                page.add_script_tag(content=axe)
+                results[path] = page.evaluate("""async () => {
+                    const r = await axe.run(document, {runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa']});
+                    return {passes: r.passes.map(p => [p.id, p.nodes.length]),
+                            violations: r.violations.map(v => [v.id, v.nodes.map(n => n.target.join(' '))])};
+                }""")
+        finally:
+            browser.close()
+    for path, result in results.items():
+        assert result["violations"] == [], (width, path, result["violations"])
+        contrast = dict(result["passes"]).get("color-contrast", 0)
+        assert contrast > 0, (width, path, "axe checked no text for color-contrast")
 
 
 def _rgb_hex(rgb):
