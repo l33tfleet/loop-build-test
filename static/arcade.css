@@ -7,7 +7,7 @@ header, main { max-width: 960px; margin: 0 auto; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
                    overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em; }
-.tagline { margin: 4px 0 24px; color: var(--muted); }
+.tagline { margin: 4px 0 24px; color: var(--ink); }
 .section-nav { max-width: 960px; margin: -16px auto 24px; }
 .section-nav ul { display: flex; flex-wrap: wrap; gap: 0 20px; margin: 0; padding: 0; list-style: none; }
 .section-nav a { display: inline-flex; align-items: center; min-height: 44px; color: var(--paper); }
@@ -20,7 +20,7 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 .planet-card .label { margin: 0; color: var(--muted); font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.06em; }
 .planet-card .diameter { margin: 0; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
 .planet-card .earths { margin: 4px 0 0; color: var(--muted); font-size: 0.9rem; }
-.source { max-width: 960px; margin: 24px auto 0; color: var(--muted); font-size: 0.9rem; overflow-wrap: anywhere; }
+.source { max-width: 960px; margin: 24px auto 0; color: var(--ink); font-size: 0.9rem; overflow-wrap: anywhere; }
 .source a { color: var(--paper); }
 .shelf-sort { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 0 0 16px; }
 .shelf-sort label { font-weight: 600; }
@@ -50,7 +50,7 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 
 /* Shelf title sits above the grid, so it never takes a card cell; > keeps it off the card h3s. */
 .planet-shelf > h2 { margin: 0 0 4px; color: var(--paper); font-size: 1.35rem; }
-.shelf-note { margin: 0 0 16px; color: var(--muted); font-size: 0.9rem; }
+.shelf-note { margin: 0 0 16px; color: var(--ink); font-size: 0.9rem; }
 /* Cards keep a readable width on large screens. */
 .shelf { max-width: 960px; }
 /* Phones: two cards per row from ~370px up (390px gives 175px columns); 320px stays one column so text never wraps.
@@ -66,7 +66,7 @@ h1 { margin: 0; color: var(--paper); font-size: 2.25rem; letter-spacing: 0.02em;
 /* Diameter scale: one linear axis, circle diameter = diameter / largest diameter of a shared square track. */
 .diameter-scale { position: relative; margin: 0 0 32px; padding: 16px; border: 1px solid #24345e; border-radius: 12px; background: #101b40; }
 .diameter-scale h2 { margin: 0 0 4px; color: var(--paper); font-size: 1.35rem; }
-.scale-note { margin: 0 0 16px; color: var(--muted); font-size: 0.9rem; }
+.scale-note { margin: 0 0 16px; color: var(--ink); font-size: 0.9rem; }
 /* One note per view, switched by the same :has() as the chart; display: none keeps the other out of screen readers. */
 .scale-note[data-view="bars"] { display: none; }
 .diameter-scale:has(#scale-view-bars:checked) .scale-note[data-view="circles"] { display: none; }
@@ -152,7 +152,7 @@ main:has(#scale-view-bars:checked) .rocky-inset { display: none; }
 /* arcade.js corrects the scroll itself after an in-place update; native anchoring would correct it twice. */
 main { overflow-anchor: none; }
 .rocky-inset h3 { margin: 0 0 4px; color: var(--paper); font-size: 1.1rem; }
-.inset-note { margin: 0; color: var(--muted); font-size: 0.9rem; }
+.inset-note { margin: 0; color: var(--ink); font-size: 0.9rem; }
 .inset-rows { position: relative; display: block; aspect-ratio: 1; width: min(100%, 320px); margin: 2.5rem auto 0;
               padding: 0; list-style: none; }
 .inset-track { position: absolute; inset: 0; z-index: var(--z); display: flex; align-items: flex-end;
@@ -241,7 +241,7 @@ main { overflow-anchor: none; }
 /* Before a guess both circles are the same neutral size and colour, so they don't give the answer away. */
 .quiz-scale[data-scale="neutral"] .quiz-planet { background: radial-gradient(circle at 35% 30%, #8a96b8, #4a5679 70%); }
 .quiz-name { margin-top: 8px; color: var(--paper); font-weight: 600; }
-.quiz-scale-note { margin: 0 0 12px; color: var(--muted); font-size: 0.9rem; }
+.quiz-scale-note { margin: 0 0 12px; color: var(--ink); font-size: 0.9rem; }
 /* Perfect score: paper on the navy status box (≈15:1). The text carries the win; the bounce is extra. */
 .quiz-perfect { color: var(--paper); font-size: 1.25rem; font-weight: 700; }
 .quiz-handover { color: var(--paper); }
@@ -286,3 +286,8 @@ main { overflow-anchor: none; }
                          --planet-surface: repeating-linear-gradient(180deg, #e9d6a2 0 20%, #c9aa68 20% 26%, #dcc386 26% 40%); }
 [data-planet="uranus"] { --planet: #7fd3dc; }
 [data-planet="neptune"] { --planet: #4a6fe3; }
+
+/* Phones: scale explanations and section blurbs read at body size (#130). Last, so it beats each note's base rule. */
+@media (max-width: 420px) {
+  .tagline, .source, .shelf-note, .scale-note, .inset-note, .quiz-scale-note, .duel-scale-note { font-size: 1rem; }
+}
