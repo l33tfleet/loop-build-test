@@ -245,8 +245,31 @@ main { overflow-anchor: none; }
 /* Perfect score: paper on the navy status box (≈15:1). The text carries the win; the bounce is extra. */
 .quiz-perfect { color: var(--paper); font-size: 1.25rem; font-weight: 700; }
 .quiz-handover { color: var(--paper); }
+/* Star ring: decorative, aria-hidden, glyphs drawn by CSS with empty alt text so the status text stays the same.
+   The stars share the banner's grid cell; padding gives them room above and below the words. */
+.quiz-answer:has(> .quiz-stars) { display: grid; }
+.quiz-stars, .quiz-stars + .quiz-perfect { grid-row: 4; grid-column: 1; }
+.quiz-stars { position: relative; pointer-events: none; }
+.quiz-stars + .quiz-perfect { margin: 0; padding: 1.1rem 1.75rem; text-align: center; }
+.quiz-star { position: absolute; top: var(--y); left: var(--x); color: #ffd36b; font-size: 1.1rem; line-height: 1;
+             transform: translate(-50%, -50%) rotate(var(--r, 0deg)); }
+.quiz-star::before { content: "★" / ""; }
+.quiz-star:nth-child(1) { --x: 0.7rem; --y: 50%; --r: -15deg; font-size: 1.4rem; }
+.quiz-star:nth-child(2) { --x: 22%; --y: 12%; --r: 10deg; }
+.quiz-star:nth-child(3) { --x: 50%; --y: 10%; font-size: 0.9rem; }
+.quiz-star:nth-child(4) { --x: 78%; --y: 12%; --r: -10deg; }
+.quiz-star:nth-child(5) { --x: calc(100% - 0.7rem); --y: 50%; --r: 15deg; font-size: 1.4rem; }
+.quiz-star:nth-child(6) { --x: 78%; --y: 88%; --r: 20deg; }
+.quiz-star:nth-child(7) { --x: 50%; --y: 90%; font-size: 0.9rem; }
+.quiz-star:nth-child(8) { --x: 22%; --y: 88%; --r: -20deg; }
 @media (prefers-reduced-motion: no-preference) {
   .quiz-side-perfect { animation: quiz-bounce 0.6s ease-out 1; }
+  /* Each star starts at the banner's centre and flies out once to its place in the ring. */
+  .quiz-star { animation: quiz-star-burst 0.8s cubic-bezier(0.2, 0.8, 0.3, 1.2) 1 both; }
+  @keyframes quiz-star-burst {
+    from { top: 50%; left: 50%; opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
+    30% { opacity: 1; }
+  }
   @keyframes quiz-bounce { 40% { transform: translateY(-14px); } 70% { transform: translateY(0); } 85% { transform: translateY(-5px); } }
 }
 
