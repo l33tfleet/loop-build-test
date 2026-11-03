@@ -44,6 +44,7 @@
         </ul>
         <p>{{ quiz.winner.name }} has the larger diameter.</p>
         {% if perfect %}
+        <span class="quiz-stars" aria-hidden="true">{% for _ in range(8) %}<span class="quiz-star"></span>{% endfor %}</span>
         <p class="quiz-perfect"><strong>Perfect score!</strong> You got {{ quiz.resulting_score }} of {{ quiz.rounds }}!</p>
         <p class="quiz-handover">Hand the phone over: can they beat it?</p>
         {% elif quiz.complete %}
