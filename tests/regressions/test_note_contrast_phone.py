@@ -1,5 +1,6 @@
 """#130: explanatory notes use the body --ink colour (or brighter) and reach 16px on phones."""
 import re
+from html.parser import HTMLParser
 
 import pytest
 
@@ -35,6 +36,7 @@ def _contrast(a, b):
 def _decls(css, selector):
     """Declarations of every top-level rule whose selector list names `selector` exactly."""
     out = []
+    css = re.sub(r"/\*.*?\*/", "", css, flags=re.DOTALL)
     for sel, body in re.findall(r"([^{}]+)\{([^{}]*)\}", PHONE.sub("", css)):
         if selector in [s.strip() for s in sel.split(",")]:
             out.append(body)
@@ -83,6 +85,63 @@ def test_chart_labels_inside_circles_unchanged(client):
     assert _last(_decls(css, ".inset-name"), "color") == "var(--paper)"
     for selector in (".scale-label", ".inset-label"):
         assert _last(_decls(css, selector), "color") is None, selector
+
+
+VOID = frozenset({"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"})
+
+
+class _NoteBackdrops(HTMLParser):
+    """For each note element, the classes of it and its ancestors, innermost first."""
+
+    def __init__(self):
+        super().__init__()
+        self.stack, self.found = [], []
+
+    def handle_starttag(self, tag, attrs):
+        classes = (dict(attrs).get("class") or "").split()
+        if tag in VOID:
+            return
+        self.stack.append(classes)
+        for selector in NOTES:
+            if selector[1:] in classes:
+                self.found.append((selector, [c for level in reversed(self.stack) for c in level]))
+
+    def handle_endtag(self, tag):
+        if tag not in VOID and self.stack:
+            self.stack.pop()
+
+
+def _colour(css, value):
+    var = re.fullmatch(r"var\((--[\w-]+)\)", value.strip())
+    if var:
+        return _hex(css, var.group(1))
+    plain = re.fullmatch(r"#([0-9a-fA-F]{6})", value.strip())
+    return plain.group(1) if plain else None
+
+
+def test_offline_axe_color_contrast_for_notes(client):
+    """axe's color-contrast rule (WCAG AA, 4.5:1 for normal text) for every rendered note.
+
+    axe-core is not installed and tests run offline, so this applies the same check from the
+    stylesheet: each note's text colour against the nearest ancestor panel's solid background.
+    """
+    css = _css(client)
+    checked = set()
+    for path in PAGES:
+        parser = _NoteBackdrops()
+        parser.feed(client.get(path).text)
+        for selector, ancestry in parser.found:
+            fg = _colour(css, _last(_decls(css, selector), "color") or "var(--ink)")
+            bg = _hex(css, "--navy")  # body background
+            for cls in ancestry:
+                found = _last(_decls(css, "." + cls), "background")
+                if found and _colour(css, found):
+                    bg = _colour(css, found)
+                    break
+            assert fg, selector
+            assert _contrast(fg, bg) >= 4.5, (path, selector, fg, bg, round(_contrast(fg, bg), 2))
+            checked.add(selector)
+    assert checked == set(NOTES), set(NOTES) - checked
 
 
 def _computed(client, width):
